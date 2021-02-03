@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mmdetection源码解析 | null</title><meta name="keywords" content="mmdetection,pytorch"><meta name="author" content="Walter"><meta name="copyright" content="Walter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="train源码解析train部分有两个train.py文件，一个位于tools下，另一个位于mmdet&#x2F;api下，tools下的是更高层的api，mmdet&#x2F;api下的主要是定义了train_detector。二者的关系是： tools&#x2F;train.py中调用mmdet&#x2F;core&#x2F;train.py中定义的train_detector。而train_detector又主要功能就是判断是多GPU分布式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mmdetection源码解析">
+<meta property="og:url" content="https://khalitt.github.io/2019/12/04/mmdetection-code-explanation/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="train源码解析train部分有两个train.py文件，一个位于tools下，另一个位于mmdet&#x2F;api下，tools下的是更高层的api，mmdet&#x2F;api下的主要是定义了train_detector。二者的关系是： tools&#x2F;train.py中调用mmdet&#x2F;core&#x2F;train.py中定义的train_detector。而train_detector又主要功能就是判断是多GPU分布式">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2019-12-04T09:50:41.000Z">
+<meta property="article:modified_time" content="2021-01-07T02:06:55.768Z">
+<meta property="article:author" content="Walter">
+<meta property="article:tag" content="mmdetection">
+<meta property="article:tag" content="pytorch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://khalitt.github.io/2019/12/04/mmdetection-code-explanation/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"5100G1WE6M","apiKey":"c2a0f74ed768aa33e0c961937aa244bc","indexName":"prob_khalitt_github_io2","hits":{"per_page":6},"languages":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}.","hits_stats":"${hits} results found in ${time} ms"}},
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-01-07 10:06:55'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">mmdetection源码解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2019-12-04T09:50:41.000Z" title="Created 2019-12-04 17:50:41">2019-12-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-01-07T02:06:55.768Z" title="Updated 2021-01-07 10:06:55">2021-01-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/mmdetection/">mmdetection</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">974</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>3min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="train源码解析"><a href="#train源码解析" class="headerlink" title="train源码解析"></a>train源码解析</h2><p>train部分有两个train.py文件，一个位于tools下，另一个位于mmdet/api下，tools下的是更高层的api，mmdet/api下的主要是定义了<code>train_detector</code>。二者的关系是：</p>
+<p>tools/train.py中调用mmdet/core/train.py中定义的<code>train_detector</code>。而<code>train_detector</code>又主要功能就是判断是多GPU分布式训练还是单GPU训练。</p>
+<p>同时mmdet/core/train.py中还定义好了<code>batch_processor</code>以及它所调用的<code>parse_losses</code>，二者的作用如下：</p>
+<ul>
+<li><code>batch_processor</code>就是执行一个batch的操作，在目标检测中对应某一个batch（2~3张imgs per gpu)，以train为例，则<code>batch_processor</code>就是执行一个forward并把所有输出记录再outputs中</li>
+<li><code>parse_losses</code>，把outputs中的各个loss简单sum起来存到loss变量中，为后续回传梯度用。同时还把具体的value与key提取出来存到log_var的供logging用</li>
+</ul>
+<p>下面着重以<code>_non_dist_train</code>为主</p>
+<h3 id="non-dist-train-主要用了Runner"><a href="#non-dist-train-主要用了Runner" class="headerlink" title="_non_dist_train 主要用了Runner"></a><code>_non_dist_train</code> 主要用了Runner</h3><ol>
+<li>构建Dataloader（DataLoader还是用的pytorch的Dataloader）</li>
+<li>把model用mmdet定义的<code>MMDataParallel</code>包装起来</li>
+<li>引入mmcv中的helper类：runner。runner是训练的主要执行者。</li>
+</ol>
+<h3 id="Runner：负责整个train或者test运行的过程"><a href="#Runner：负责整个train或者test运行的过程" class="headerlink" title="Runner：负责整个train或者test运行的过程"></a>Runner：负责整个train或者test运行的过程</h3><h4 id="Runner的初始化"><a href="#Runner的初始化" class="headerlink" title="Runner的初始化"></a>Runner的初始化</h4><ol>
+<li><p>需要确定model，batch_processor, optimizer等等，其中batch_processor主要是处理一个batch的。</p>
+</li>
+<li><p>还需要注册hook（train和test的hook分开注册）</p>
+</li>
+</ol>
+<h4 id="Runner的Hook"><a href="#Runner的Hook" class="headerlink" title="Runner的Hook"></a>Runner的Hook</h4><p>默认都是定义在mmcv/runner/hooks下面。</p>
+<p>默认情况下，runner的<code>register_training_hooks</code>会定义</p>
+<ol>
+<li><p><code>LrUpdateHook</code>：控制学习率是如何更新的，必选</p>
+</li>
+<li><p><code>OptimizerHook</code>控制如何更新模型</p>
+</li>
+<li><p><code>LoggerHook</code>如何logging</p>
+<p>还有<code>CheckpointHook</code>和<code>IterTimeHook</code>，作用如起字面意思。</p>
+</li>
+</ol>
+<p>特点：</p>
+<ul>
+<li>除了lr和logging在runner中有专门的register函数，其余均共享<code>register_hook</code>函数定义</li>
+<li>可以按照基类Hook的定义自定义Hook，要注意所有Hook具体执行任务的函数，基本都有一个runner这个选项，<strong>因此需要在hook之间传递或者需要改变train或者test过程时，所有变量应该都储存在Runner中</strong></li>
+</ul>
+<h4 id="Runner的dict"><a href="#Runner的dict" class="headerlink" title="Runner的dict"></a>Runner的<strong>dict</strong></h4><p>主要有：</p>
+<ol>
+<li>model</li>
+<li>datasets</li>
+<li>_max_iter 最大的执行步数</li>
+<li>max_epoch 最大epoch数</li>
+<li>_inner_iter 当前epoch下执行了多少个step</li>
+<li>_iter 总共执行了多少个step</li>
+<li>_epoch 当前epoch</li>
+</ol>
+<p>可以看到runner主要还是保存了train或者test所需的基本变量，并记录训练过程以供所有hook一起使用。</p>
+<h4 id="Runner-run-执行train或者test"><a href="#Runner-run-执行train或者test" class="headerlink" title="Runner.run() 执行train或者test"></a>Runner.run() 执行train或者test</h4><p>定义在cfg文件中的workflow在此处具体执行。</p>
+<p>对于workflow中的子flow，需要提前在Runner中定义好对应的成员函数</p>
+<p>当前mmdet暂时<strong>只支持一个workflow中为单train或者单test</strong>，而没办法两个嵌套起来，因此test需要单独操作。</p>
+<h2 id="two-stage-detector的训练过程"><a href="#two-stage-detector的训练过程" class="headerlink" title="two stage detector的训练过程"></a>two stage detector的训练过程</h2><p>下面主要以fasterrcnn为例。可参考 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/31426458">一文读懂Faster RCNN</a></p>
+<p>fasterrcnn定义在mmdet/models/detectors下面，定义很简单，只是简单地继承two stage detector，并把一些参数固定。因此可以认为<strong>two stage detector</strong>就是faster rcnn</p>
+<h3 id="提取feature"><a href="#提取feature" class="headerlink" title="提取feature"></a>提取feature</h3><p>这部分的module主要有cfg中的backbone和neck确定，neck之所以称之为neck就是因为<strong>它是直接接在backbone后面</strong>，充当backbone和rpn_head等head之间的桥梁。</p>
+<p>如默认faster rcnn的config中用FPN作为neck，需要注意的参数就是最后的<code>num_outs</code>，直接决定了<strong>feats的level</strong>，即multi level指的是输出list的len</p>
+<h3 id="获取rpn-cls-score和rpn-bbox-pred"><a href="#获取rpn-cls-score和rpn-bbox-pred" class="headerlink" title="获取rpn_cls_score和rpn_bbox_pred"></a>获取rpn_cls_score和rpn_bbox_pred</h3><p>这二者就是rpn_head的forward的输出rpn_outs。</p>
+<ol>
+<li>rpn_cls_score：List[per_level_cls_scores]，里面的每个元素，分别对应各个level的featmaps上的每一个pixel（每一个点）的分数，<strong>主要是用来判断这个点对应的anchor是不是bbox</strong></li>
+<li>rpn_bbox_pred：List[per_level_bbox_pred]，实际上应该是用来做boundary regression的输入，<strong>也即对anchor进行精修的</strong>。值得一提的是，boundary box regression总共有两次，这里是第一次</li>
+</ol>
+<h3 id="基于rpn-outs算rpn-loss"><a href="#基于rpn-outs算rpn-loss" class="headerlink" title="基于rpn_outs算rpn_loss"></a>基于rpn_outs算rpn_loss</h3><h3 id="获取proposals"><a href="#获取proposals" class="headerlink" title="获取proposals"></a>获取proposals</h3><p>主要在<code>rpn_head.get_bboxes</code>中完成，这里面实际上同时做了两步：</p>
+<ol>
+<li><p>对于每一个level，基于feat map用对应的anchor generator获取anchors(对应的AnchorGenerator在初始化的时候已经定义好了)</p>
+</li>
+<li><p>基于每个level的rpn_cls_socre与rpn_bbox_pred，输出对应proposal</p>
+</li>
+</ol>
+<p>proposal_list: List[per_level_proposals]，即每个level都要对应proposal_list的一个元素，具体为(min(nums_post, max_num), 5)的tensor</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Walter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://khalitt.github.io/2019/12/04/mmdetection-code-explanation/">https://khalitt.github.io/2019/12/04/mmdetection-code-explanation/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/mmdetection/">mmdetection</a><a class="post-meta__tags" href="/tags/pytorch/">pytorch</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/12/31/tmux-usage/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">tmux使用</div></div></a></div><div class="next-post pull-right"><a href="/2019/11/25/mmdetection-usage/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">mmdetection的使用基础</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2019/11/25/mmdetection-usage/" title="mmdetection的使用基础"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-11-25</div><div class="title">mmdetection的使用基础</div></div></a></div><div><a href="/2019/09/17/pytorch-dataloader-and-sampler/" title="pytorch中的Dataloader与Sampler(以及collate_fn)"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-09-17</div><div class="title">pytorch中的Dataloader与Sampler(以及collate_fn)</div></div></a></div><div><a href="/2021/01/08/pytorch-meta-learning/" title="pytorch-meta-learning"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-01-08</div><div class="title">pytorch-meta-learning</div></div></a></div><div><a href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-02-03</div><div class="title">解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn</div></div></a></div><div><a href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-02-01</div><div class="title">pytorch nan处理</div></div></a></div><div><a href="/2019/09/10/pytorch-basic/" title="pytorch的基本操作"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-09-10</div><div class="title">pytorch的基本操作</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/null" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Walter</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#train%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">train源码解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#non-dist-train-%E4%B8%BB%E8%A6%81%E7%94%A8%E4%BA%86Runner"><span class="toc-number">1.1.</span> <span class="toc-text">_non_dist_train 主要用了Runner</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Runner%EF%BC%9A%E8%B4%9F%E8%B4%A3%E6%95%B4%E4%B8%AAtrain%E6%88%96%E8%80%85test%E8%BF%90%E8%A1%8C%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">Runner：负责整个train或者test运行的过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Runner%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.1.</span> <span class="toc-text">Runner的初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Runner%E7%9A%84Hook"><span class="toc-number">1.2.2.</span> <span class="toc-text">Runner的Hook</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Runner%E7%9A%84dict"><span class="toc-number">1.2.3.</span> <span class="toc-text">Runner的dict</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Runner-run-%E6%89%A7%E8%A1%8Ctrain%E6%88%96%E8%80%85test"><span class="toc-number">1.2.4.</span> <span class="toc-text">Runner.run() 执行train或者test</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#two-stage-detector%E7%9A%84%E8%AE%AD%E7%BB%83%E8%BF%87%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">two stage detector的训练过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8F%96feature"><span class="toc-number">2.1.</span> <span class="toc-text">提取feature</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96rpn-cls-score%E5%92%8Crpn-bbox-pred"><span class="toc-number">2.2.</span> <span class="toc-text">获取rpn_cls_score和rpn_bbox_pred</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Erpn-outs%E7%AE%97rpn-loss"><span class="toc-number">2.3.</span> <span class="toc-text">基于rpn_outs算rpn_loss</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96proposals"><span class="toc-number">2.4.</span> <span class="toc-text">获取proposals</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/hello-world/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2021/02/03/hello-world/" title="Hello World">Hello World</a><time datetime="2021-02-03T13:47:24.254Z" title="Created 2021-02-03 21:47:24">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"/></a><div class="content"><a class="title" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn">解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn</a><time datetime="2021-02-02T16:36:43.000Z" title="Created 2021-02-03 00:36:43">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch nan处理"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理">pytorch nan处理</a><time datetime="2021-02-01T12:36:37.000Z" title="Created 2021-02-01 20:36:37">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hydra可重复性"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性">hydra可重复性</a><time datetime="2021-01-31T16:06:31.000Z" title="Created 2021-02-01 00:06:31">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch不同Dataloader实现方式的比较"/></a><div class="content"><a class="title" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较">pytorch不同Dataloader实现方式的比较</a><time datetime="2021-01-21T07:15:16.000Z" title="Created 2021-01-21 15:15:16">2021-01-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Walter</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

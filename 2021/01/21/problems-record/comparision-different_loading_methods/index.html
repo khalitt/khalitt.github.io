@@ -1,0 +1,318 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pytorch不同Dataloader实现方式的比较 | null</title><meta name="keywords" content="python,io"><meta name="author" content="Walter"><meta name="copyright" content="Walter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="概述主要是两种实现方式：  同一个数据集，按照不同split的方式切分（比如5 Fold Validation），保存到本地，然后依次读入5种split 同一个数据集，全部一次性读入，然后按照不同的split的方式进行切分，按照迭代器或者生成器的方式返回切分后的dataset或者Dataloader  核心代码： 第一种方式 class Reuters(BaseDataLoader):     d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pytorch不同Dataloader实现方式的比较">
+<meta property="og:url" content="https://khalitt.github.io/2021/01/21/problems-record/comparision-different_loading_methods/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="概述主要是两种实现方式：  同一个数据集，按照不同split的方式切分（比如5 Fold Validation），保存到本地，然后依次读入5种split 同一个数据集，全部一次性读入，然后按照不同的split的方式进行切分，按照迭代器或者生成器的方式返回切分后的dataset或者Dataloader  核心代码： 第一种方式 class Reuters(BaseDataLoader):     d">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-01-21T07:15:16.000Z">
+<meta property="article:modified_time" content="2021-01-21T07:57:23.807Z">
+<meta property="article:author" content="Walter">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="io">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://khalitt.github.io/2021/01/21/problems-record/comparision-different_loading_methods/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"5100G1WE6M","apiKey":"c2a0f74ed768aa33e0c961937aa244bc","indexName":"prob_khalitt_github_io2","hits":{"per_page":6},"languages":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}.","hits_stats":"${hits} results found in ${time} ms"}},
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-01-21 15:57:23'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">pytorch不同Dataloader实现方式的比较</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2021-01-21T07:15:16.000Z" title="Created 2021-01-21 15:15:16">2021-01-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-01-21T07:57:23.807Z" title="Updated 2021-01-21 15:57:23">2021-01-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/python/">python</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">743</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>3min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>主要是两种实现方式：</p>
+<ul>
+<li>同一个数据集，按照不同split的方式切分（比如5 Fold Validation），保存到本地，然后依次读入5种split</li>
+<li>同一个数据集，全部一次性读入，然后按照不同的split的方式进行切分，按照迭代器或者生成器的方式返回切分后的dataset或者Dataloader</li>
+</ul>
+<p>核心代码：</p>
+<p>第一种方式</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">Reuters</span><span class="token punctuation">(</span>BaseDataLoader<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> root<span class="token punctuation">,</span> batch_size<span class="token punctuation">,</span> dataset_type<span class="token punctuation">,</span> noise_type<span class="token punctuation">,</span> noise_rate<span class="token punctuation">,</span> seed<span class="token punctuation">,</span> balance<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">,</span> shuffle<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">,</span>
+                 modalities<span class="token operator">=</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> num_workers<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>dataset <span class="token operator">=</span> ReutersDataset<span class="token punctuation">(</span>root<span class="token punctuation">,</span> dataset_type<span class="token punctuation">,</span> noise_type<span class="token punctuation">,</span> noise_rate<span class="token punctuation">,</span> seed<span class="token punctuation">,</span> balance<span class="token punctuation">,</span> modalities<span class="token punctuation">)</span>
+        logger<span class="token punctuation">.</span>info<span class="token punctuation">(</span><span class="token string">'&#123;&#125; dataset with &#123;&#125; samples'</span><span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span>dataset_type<span class="token punctuation">,</span> <span class="token builtin">len</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>dataset<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span>self<span class="token punctuation">.</span>dataset<span class="token punctuation">,</span> batch_size<span class="token punctuation">,</span> shuffle<span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> num_workers<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
+
+<p>第二种方式：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">get_reuters_cv_dataloader</span><span class="token punctuation">(</span>og_data<span class="token punctuation">,</span> batch_size<span class="token punctuation">,</span> noise_type<span class="token punctuation">,</span> noise_rate<span class="token punctuation">,</span> n_classes<span class="token punctuation">,</span> seed<span class="token punctuation">,</span> val_test_split<span class="token punctuation">,</span> n_splits<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">,</span>
+                              deal_imbalance<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">,</span>
+                              modalities<span class="token operator">=</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> num_workers<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span> shuffle<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token comment"># List[Dataset]</span>
+    all_train_dataset<span class="token punctuation">,</span> all_val_dataset<span class="token punctuation">,</span> all_test_dataset <span class="token operator">=</span> get_reuters_cv_dataset<span class="token punctuation">(</span>og_data<span class="token punctuation">,</span> noise_type<span class="token punctuation">,</span> noise_rate<span class="token punctuation">,</span>
+                                                                                  n_classes<span class="token punctuation">,</span> seed<span class="token punctuation">,</span> val_test_split<span class="token punctuation">,</span>
+                                                                                  n_splits<span class="token operator">=</span>n_splits<span class="token punctuation">,</span>
+                                                                                  deal_imbalance<span class="token operator">=</span>deal_imbalance<span class="token punctuation">,</span>
+                                                                                  modalities<span class="token operator">=</span>modalities<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>n_splits<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        train_data_loader <span class="token operator">=</span> BaseDataLoader<span class="token punctuation">(</span>all_train_dataset<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> batch_size<span class="token punctuation">,</span> shuffle<span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> num_workers<span class="token punctuation">)</span>
+        val_data_loader <span class="token operator">=</span> BaseDataLoader<span class="token punctuation">(</span>all_val_dataset<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> batch_size<span class="token punctuation">,</span> shuffle<span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> num_workers<span class="token punctuation">)</span>
+        test_data_loader <span class="token operator">=</span> BaseDataLoader<span class="token punctuation">(</span>all_test_dataset<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> batch_size<span class="token punctuation">,</span> shuffle<span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">,</span> num_workers<span class="token punctuation">)</span>
+        <span class="token keyword">yield</span> train_data_loader<span class="token punctuation">,</span> val_data_loader<span class="token punctuation">,</span> test_data_loader
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
+
+
+
+
+
+<h1 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h1><p>比较的方式：5种切分方式（5 Fold Validation），跑10次取平均，并输出每一次两种初始化方式的总时间</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> time
+
+<span class="token keyword">from</span> omegaconf <span class="token keyword">import</span> OmegaConf
+
+<span class="token keyword">from</span> srcs<span class="token punctuation">.</span>data_loader<span class="token punctuation">.</span>all_data_loaders <span class="token keyword">import</span> get_reuters_cv_dataloader
+<span class="token keyword">from</span> srcs<span class="token punctuation">.</span>utils <span class="token keyword">import</span> instantiate
+
+config <span class="token operator">=</span> OmegaConf<span class="token punctuation">.</span>load<span class="token punctuation">(</span>
+    <span class="token string">'/home/weitaotang/multimodal/hydra_templates/srcs/independent_utlis/test_different_loaders/reuters_all_cv_train.yaml'</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">def</span> <span class="token function">independent_init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    begin <span class="token operator">=</span> time<span class="token punctuation">.</span>time<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>n_splits<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        config<span class="token punctuation">.</span>root <span class="token operator">=</span> config<span class="token punctuation">.</span>root<span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+        train_data_loader <span class="token operator">=</span> instantiate<span class="token punctuation">(</span>config<span class="token punctuation">.</span>train<span class="token punctuation">)</span>
+        valid_data_loader <span class="token operator">=</span> instantiate<span class="token punctuation">(</span>config<span class="token punctuation">.</span>val<span class="token punctuation">)</span>
+        test_data_loader <span class="token operator">=</span> instantiate<span class="token punctuation">(</span>config<span class="token punctuation">.</span>test<span class="token punctuation">)</span>
+        <span class="token comment"># end = time.time()</span>
+        <span class="token comment"># print("Split &#123;&#125; used &#123;:.3f&#125;s".format(i, end - begin))</span>
+    end <span class="token operator">=</span> time<span class="token punctuation">.</span>time<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">'Independent init used &#123;:.3f&#125; seconds'</span><span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span>end <span class="token operator">-</span> begin<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    res <span class="token operator">=</span> end <span class="token operator">-</span> begin
+    <span class="token keyword">return</span> res
+
+
+<span class="token keyword">def</span> <span class="token function">all_init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    begin <span class="token operator">=</span> time<span class="token punctuation">.</span>time<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    cv_dataloader <span class="token operator">=</span> get_reuters_cv_dataloader<span class="token punctuation">(</span>config<span class="token punctuation">.</span>og_data<span class="token punctuation">,</span> config<span class="token punctuation">.</span>batch_size<span class="token punctuation">,</span> config<span class="token punctuation">.</span>noise_type<span class="token punctuation">,</span> config<span class="token punctuation">.</span>noise_rate<span class="token punctuation">,</span>
+                                              config<span class="token punctuation">.</span>n_classes<span class="token punctuation">,</span> config<span class="token punctuation">.</span>seed<span class="token punctuation">,</span> config<span class="token punctuation">.</span>val_test_split<span class="token punctuation">,</span>
+                                              config<span class="token punctuation">.</span>n_splits<span class="token punctuation">,</span> config<span class="token punctuation">.</span>deal_imbalance<span class="token punctuation">,</span> config<span class="token punctuation">.</span>modalities<span class="token punctuation">,</span>
+                                              config<span class="token punctuation">.</span>num_workers<span class="token punctuation">,</span> config<span class="token punctuation">.</span>shuffle<span class="token punctuation">)</span>
+
+    <span class="token comment"># cv_dataloader_iter = iter(cv_dataloader)</span>
+    <span class="token comment"># train, valid, test = next(cv_dataloader_iter)</span>
+    <span class="token keyword">for</span> i<span class="token punctuation">,</span> <span class="token punctuation">(</span>train<span class="token punctuation">,</span> valid<span class="token punctuation">,</span> test<span class="token punctuation">)</span> <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span>cv_dataloader<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        end <span class="token operator">=</span> time<span class="token punctuation">.</span>time<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token comment"># print("Split &#123;&#125; used &#123;:.3f&#125;s".format(i, end - begin))</span>
+        <span class="token keyword">pass</span>
+
+    end <span class="token operator">=</span> time<span class="token punctuation">.</span>time<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">'ALL init used &#123;:.3f&#125; seconds'</span><span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span>end <span class="token operator">-</span> begin<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    res <span class="token operator">=</span> end <span class="token operator">-</span> begin
+    <span class="token keyword">return</span> res
+
+
+<span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">'__main__'</span><span class="token punctuation">:</span>
+    all_res <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+    <span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        all_res<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span>independent_init<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        all_res<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span>all_init<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"Independent avg:&#123;:.6f&#125; | all avg: &#123;:.6f&#125;"</span><span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span><span class="token builtin">sum</span><span class="token punctuation">(</span>all_res<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1</span><span class="token punctuation">.</span> <span class="token operator">/</span> <span class="token builtin">len</span><span class="token punctuation">(</span>all_res<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                                                            <span class="token builtin">sum</span><span class="token punctuation">(</span>all_res<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1</span><span class="token punctuation">.</span> <span class="token operator">/</span> <span class="token builtin">len</span><span class="token punctuation">(</span>all_res<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<h1 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h1><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Independent init used <span class="token number">6.621</span> seconds
+ALL init used <span class="token number">6.215</span> seconds
+Independent init used <span class="token number">6.875</span> seconds
+ALL init used <span class="token number">6.074</span> seconds
+Independent init used <span class="token number">6.661</span> seconds
+ALL init used <span class="token number">6.247</span> seconds
+Independent init used <span class="token number">6.416</span> seconds
+ALL init used <span class="token number">5.833</span> seconds
+Independent init used <span class="token number">6.244</span> seconds
+ALL init used <span class="token number">6.292</span> seconds
+Independent init used <span class="token number">7.124</span> seconds
+ALL init used <span class="token number">5.922</span> seconds
+Independent init used <span class="token number">6.636</span> seconds
+ALL init used <span class="token number">6.253</span> seconds
+Independent init used <span class="token number">6.307</span> seconds
+ALL init used <span class="token number">6.150</span> seconds
+Independent init used <span class="token number">6.520</span> seconds
+ALL init used <span class="token number">5.989</span> seconds
+Independent init used <span class="token number">6.841</span> seconds
+ALL init used <span class="token number">6.281</span> seconds
+Independent avg:6.624528 <span class="token operator">|</span> all avg: <span class="token number">6.125607</span>
+
+Process finished with <span class="token builtin class-name">exit</span> code <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<p>可以看到总体上还是<strong>方式二快一些</strong>，<strong>直接读入所有数据然后直接进行处理</strong>。<strong>但是弊端也比较明显</strong>：</p>
+<ul>
+<li>不够灵活，比如不想进行validation的时候，就需要另外再重新实现</li>
+<li>占用内存可能较大，比如不想载入全部数据时候，等于浪费了内存</li>
+</ul>
+<p>因此如果<strong>不是密集io的情况，方式一就够了，更灵活</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Walter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://khalitt.github.io/2021/01/21/problems-record/comparision-different_loading_methods/">https://khalitt.github.io/2021/01/21/problems-record/comparision-different_loading_methods/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/python/">python</a><a class="post-meta__tags" href="/tags/io/">io</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/02/01/problems-record/hydra-reproducibility/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">hydra可重复性</div></div></a></div><div class="next-post pull-right"><a href="/2021/01/20/problems-record/hydra-optuna-TypeError/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">hydra optuna sweeper TypeError: 'float' object is not iterable的错误</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2020/05/06/matplotlib-usage/" title="matplotlib使用"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-05-06</div><div class="title">matplotlib使用</div></div></a></div><div><a href="/2020/04/22/pandas-usage-md/" title="pandas基础使用"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-04-22</div><div class="title">pandas基础使用</div></div></a></div><div><a href="/2020/01/16/opencv-usage/" title="OpenCV基础使用"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-16</div><div class="title">OpenCV基础使用</div></div></a></div><div><a href="/2019/09/10/python-configparser/" title="python config 读取与config parser的使用"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-09-10</div><div class="title">python config 读取与config parser的使用</div></div></a></div><div><a href="/2019/09/17/python-generator-yield/" title="pythons生成器(generator)、yield的理解"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-09-17</div><div class="title">pythons生成器(generator)、yield的理解</div></div></a></div><div><a href="/2020/04/30/python-multi-thread-usage/" title="python多线程的使用"><img class="cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-04-30</div><div class="title">python多线程的使用</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/null" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Walter</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%AF%94%E8%BE%83"><span class="toc-number">2.</span> <span class="toc-text">比较</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">3.</span> <span class="toc-text">结果</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/hello-world/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2021/02/03/hello-world/" title="Hello World">Hello World</a><time datetime="2021-02-03T13:47:24.254Z" title="Created 2021-02-03 21:47:24">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"/></a><div class="content"><a class="title" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn">解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn</a><time datetime="2021-02-02T16:36:43.000Z" title="Created 2021-02-03 00:36:43">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch nan处理"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理">pytorch nan处理</a><time datetime="2021-02-01T12:36:37.000Z" title="Created 2021-02-01 20:36:37">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hydra可重复性"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性">hydra可重复性</a><time datetime="2021-01-31T16:06:31.000Z" title="Created 2021-02-01 00:06:31">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch不同Dataloader实现方式的比较"/></a><div class="content"><a class="title" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较">pytorch不同Dataloader实现方式的比较</a><time datetime="2021-01-21T07:15:16.000Z" title="Created 2021-01-21 15:15:16">2021-01-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Walter</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

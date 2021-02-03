@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>jupyter lab配置教程 | null</title><meta name="keywords" content="jupyter_lab"><meta name="author" content="Walter"><meta name="copyright" content="Walter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="参考： 服务器集成anaconda安装jupyter-notebook JUPYTERLAB 的安装与配置 安装直接通过conda安装即可 conda install jupyter-lab   配置1. 先生成配置文件jupyter lab --generate-config 2. 修改password在本地&#x2F;home&#x2F;xxx&#x2F;.jupyter&#x2F;jupyter_notebook_config.p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jupyter lab配置教程">
+<meta property="og:url" content="https://khalitt.github.io/2019/09/21/jupyter-lab-tutorial/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="参考： 服务器集成anaconda安装jupyter-notebook JUPYTERLAB 的安装与配置 安装直接通过conda安装即可 conda install jupyter-lab   配置1. 先生成配置文件jupyter lab --generate-config 2. 修改password在本地&#x2F;home&#x2F;xxx&#x2F;.jupyter&#x2F;jupyter_notebook_config.p">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2019-09-21T03:05:43.000Z">
+<meta property="article:modified_time" content="2021-01-07T02:06:55.764Z">
+<meta property="article:author" content="Walter">
+<meta property="article:tag" content="jupyter_lab">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://khalitt.github.io/2019/09/21/jupyter-lab-tutorial/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"5100G1WE6M","apiKey":"c2a0f74ed768aa33e0c961937aa244bc","indexName":"prob_khalitt_github_io2","hits":{"per_page":6},"languages":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}.","hits_stats":"${hits} results found in ${time} ms"}},
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-01-07 10:06:55'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">jupyter lab配置教程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2019-09-21T03:05:43.000Z" title="Created 2019-09-21 11:05:43">2019-09-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-01-07T02:06:55.764Z" title="Updated 2021-01-07 10:06:55">2021-01-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/python/">python</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/python/jupyter/">jupyter</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">426</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>1min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>参考：</p>
+<p><a href="%5Bhttps://543877815.github.io/2019/04/10/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E6%88%90anaconda%E5%AE%89%E8%A3%85jupyter-notebook/%5D(https://543877815.github.io/2019/04/10/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E6%88%90anaconda%E5%AE%89%E8%A3%85jupyter-notebook/)">服务器集成anaconda安装jupyter-notebook</a></p>
+<p><a target="_blank" rel="noopener" href="https://lyric.im/c/the-craft-of-selfteaching/T-appendix.jupyter-installation-and-setup">JUPYTERLAB 的安装与配置</a></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>直接通过conda安装即可</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">conda install jupyter<span class="token operator">-</span>lab<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="1-先生成配置文件"><a href="#1-先生成配置文件" class="headerlink" title="1. 先生成配置文件"></a>1. 先生成配置文件</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">jupyter lab --generate-config<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h3 id="2-修改password"><a href="#2-修改password" class="headerlink" title="2. 修改password"></a>2. 修改password</h3><p>在本地/home/xxx/.jupyter/jupyter_notebook_config.py，打开这个py文件</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">c<span class="token punctuation">.</span>NotebookApp<span class="token punctuation">.</span>ip <span class="token operator">=</span> <span class="token string">'*'</span> <span class="token comment"># 允许访问此服务器的 IP，星号表示任意 IP</span>
+c<span class="token punctuation">.</span>NotebookApp<span class="token punctuation">.</span>password <span class="token operator">=</span> <span class="token string">u'sha1:xxx:xxx'</span> <span class="token comment"># 之前生成的密码 hash 字串</span>
+c<span class="token punctuation">.</span>NotebookApp<span class="token punctuation">.</span>open_browser <span class="token operator">=</span> <span class="token boolean">False</span> <span class="token comment"># 运行时不打开本机浏览器</span>
+c<span class="token punctuation">.</span>NotebookApp<span class="token punctuation">.</span>port <span class="token operator">=</span> <span class="token number">12035</span> <span class="token comment"># 使用的端口，随意设置</span>
+c<span class="token punctuation">.</span>NotebookApp<span class="token punctuation">.</span>enable_mathjax <span class="token operator">=</span> <span class="token boolean">True</span> <span class="token comment"># 启用 MathJax</span>
+c<span class="token punctuation">.</span>NotebookApp<span class="token punctuation">.</span>allow_remote_access <span class="token operator">=</span> <span class="token boolean">True</span> <span class="token comment"># 允许远程访问</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="3-安装插件"><a href="#3-安装插件" class="headerlink" title="3. 安装插件"></a>3. 安装插件</h3><pre class="line-numbers language-python" data-language="python"><code class="language-python">conda install <span class="token operator">-</span>c conda<span class="token operator">-</span>forge jupyter_contrib_nbextensions
+jupyter contrib nbextension install <span class="token operator">-</span><span class="token operator">-</span>user
+jupyter nbextensions_configurator enable <span class="token operator">-</span><span class="token operator">-</span>user<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+
+<h3 id="4-配置中文"><a href="#4-配置中文" class="headerlink" title="4. 配置中文"></a>4. 配置中文</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/github_33934628/article/details/77874674"></a></p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><ol>
+<li><h3 id="配置mobaxterm的ssh-tunnel转发"><a href="#配置mobaxterm的ssh-tunnel转发" class="headerlink" title="配置mobaxterm的ssh tunnel转发"></a>配置mobaxterm的ssh tunnel转发</h3><p>Tools - MobaSSHTuneel(port forwarding) - New SSH Tunnel</p>
+</li>
+</ol>
+<p>在上述地方中：</p>
+<ul>
+<li>Remote Server, SSH server都是服务器的地址</li>
+<li>Remote Port指的是Jupyter lab的端口，即上面中填入的端口</li>
+<li>SSH port指的是登陆服务器要用的端口，一般是22</li>
+<li>Forward Port指的是映射到本地的端口，随便填</li>
+</ul>
+<h3 id="使用extensions"><a href="#使用extensions" class="headerlink" title="使用extensions"></a>使用extensions</h3><p>直接使用很可能出现 jupyter build failed的错误，很多时候是因为nodejs和npm的安装问题。因此需要先通过conda安装这两个</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">conda <span class="token function">install</span> -c conda-forge nodejs
+conda <span class="token function">install</span> -c tejzpr <span class="token function">npm</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h3 id="修改字体"><a href="#修改字体" class="headerlink" title="修改字体"></a>修改字体</h3><p>参考</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/40012144">jupyter notebook中显示字体如何调整？</a></p>
+<p>直接安装stylus，然后在里面找jupyter lab的主题</p>
+<h3 id="修改matplotlib图片大小"><a href="#修改matplotlib图片大小" class="headerlink" title="修改matplotlib图片大小"></a>修改matplotlib图片大小</h3><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token operator">%</span>matplotlib inline
+<span class="token keyword">import</span> matplotlib<span class="token punctuation">.</span>pyplot <span class="token keyword">as</span> plt
+plt<span class="token punctuation">.</span>rcParams<span class="token punctuation">[</span><span class="token string">"figure.figsize"</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span>
+plt<span class="token punctuation">.</span>rcParams<span class="token punctuation">[</span><span class="token string">'figure.dpi'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">300</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<h3 id="本地访问远程的jupyter"><a href="#本地访问远程的jupyter" class="headerlink" title="本地访问远程的jupyter"></a>本地访问远程的jupyter</h3><p>把远程的8888映射到本地的1234</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ssh</span> -N -f -L localhost:1234:localhost:8888 tangweitao.walter@devbox<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+
+<h3 id="让conda环境在notebook中被发现"><a href="#让conda环境在notebook中被发现" class="headerlink" title="让conda环境在notebook中被发现"></a>让conda环境在notebook中被发现</h3><p><a target="_blank" rel="noopener" href="https://ipython.readthedocs.io/en/stable/install/kernel_install.html">ipython kernel</a></p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">pip install ipykernal
+python <span class="token operator">-</span>m ipykernel install <span class="token operator">-</span><span class="token operator">-</span>user <span class="token operator">-</span><span class="token operator">-</span>name myenv <span class="token operator">-</span><span class="token operator">-</span>display<span class="token operator">-</span>name <span class="token string">"Python (myenv)"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Walter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://khalitt.github.io/2019/09/21/jupyter-lab-tutorial/">https://khalitt.github.io/2019/09/21/jupyter-lab-tutorial/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/jupyter-lab/">jupyter_lab</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/10/07/pycharm-usage/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">pycharm</div></div></a></div><div class="next-post pull-right"><a href="/2019/09/19/building-server/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">CloudAtCost服务器搭建</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/null" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Walter</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%85%88%E7%94%9F%E6%88%90%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">2.1.</span> <span class="toc-text">1. 先生成配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BF%AE%E6%94%B9password"><span class="toc-number">2.2.</span> <span class="toc-text">2. 修改password</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6"><span class="toc-number">2.3.</span> <span class="toc-text">3. 安装插件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E9%85%8D%E7%BD%AE%E4%B8%AD%E6%96%87"><span class="toc-number">2.4.</span> <span class="toc-text">4. 配置中文</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEmobaxterm%E7%9A%84ssh-tunnel%E8%BD%AC%E5%8F%91"><span class="toc-number">3.1.</span> <span class="toc-text">配置mobaxterm的ssh tunnel转发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8extensions"><span class="toc-number">3.2.</span> <span class="toc-text">使用extensions</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E4%BD%93"><span class="toc-number">3.3.</span> <span class="toc-text">修改字体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9matplotlib%E5%9B%BE%E7%89%87%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.4.</span> <span class="toc-text">修改matplotlib图片大小</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E8%AE%BF%E9%97%AE%E8%BF%9C%E7%A8%8B%E7%9A%84jupyter"><span class="toc-number">3.5.</span> <span class="toc-text">本地访问远程的jupyter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9conda%E7%8E%AF%E5%A2%83%E5%9C%A8notebook%E4%B8%AD%E8%A2%AB%E5%8F%91%E7%8E%B0"><span class="toc-number">3.6.</span> <span class="toc-text">让conda环境在notebook中被发现</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/hello-world/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2021/02/03/hello-world/" title="Hello World">Hello World</a><time datetime="2021-02-03T13:47:24.254Z" title="Created 2021-02-03 21:47:24">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"/></a><div class="content"><a class="title" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn">解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn</a><time datetime="2021-02-02T16:36:43.000Z" title="Created 2021-02-03 00:36:43">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch nan处理"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理">pytorch nan处理</a><time datetime="2021-02-01T12:36:37.000Z" title="Created 2021-02-01 20:36:37">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hydra可重复性"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性">hydra可重复性</a><time datetime="2021-01-31T16:06:31.000Z" title="Created 2021-02-01 00:06:31">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch不同Dataloader实现方式的比较"/></a><div class="content"><a class="title" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较">pytorch不同Dataloader实现方式的比较</a><time datetime="2021-01-21T07:15:16.000Z" title="Created 2021-01-21 15:15:16">2021-01-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Walter</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

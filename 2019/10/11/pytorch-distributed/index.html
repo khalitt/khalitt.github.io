@@ -1,0 +1,375 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pytorch分布式训练初探 | null</title><meta name="keywords" content="distributed training"><meta name="author" content="Walter"><meta name="copyright" content="Walter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基础概念：进程、线程进程即process，线程即thread，从知乎的回答上看，可以了解到，线程是比进程更细粒度的划分，二者均表示占用资源（CPU、内存、IO等）的时间 world_size, rankworld_size本质就是指 进程总数，而rank则指的是 当前的进程  如果是单机多卡的模式，则world_size可以认为是 该卡的GPU总数，rank可以认为是每个GPU对应的进程（如果一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pytorch分布式训练初探">
+<meta property="og:url" content="https://khalitt.github.io/2019/10/11/pytorch-distributed/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="基础概念：进程、线程进程即process，线程即thread，从知乎的回答上看，可以了解到，线程是比进程更细粒度的划分，二者均表示占用资源（CPU、内存、IO等）的时间 world_size, rankworld_size本质就是指 进程总数，而rank则指的是 当前的进程  如果是单机多卡的模式，则world_size可以认为是 该卡的GPU总数，rank可以认为是每个GPU对应的进程（如果一个">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2019-10-11T08:52:27.000Z">
+<meta property="article:modified_time" content="2021-01-07T02:06:55.806Z">
+<meta property="article:author" content="Walter">
+<meta property="article:tag" content="distributed training">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://khalitt.github.io/2019/10/11/pytorch-distributed/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"5100G1WE6M","apiKey":"c2a0f74ed768aa33e0c961937aa244bc","indexName":"prob_khalitt_github_io2","hits":{"per_page":6},"languages":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}.","hits_stats":"${hits} results found in ${time} ms"}},
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"prismjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-01-07 10:06:55'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/"></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fas fa-musicW"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">pytorch分布式训练初探</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2019-10-11T08:52:27.000Z" title="Created 2019-10-11 16:52:27">2019-10-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-01-07T02:06:55.806Z" title="Updated 2021-01-07 10:06:55">2021-01-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/pytorch/">pytorch</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">2.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>8min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="基础概念："><a href="#基础概念：" class="headerlink" title="基础概念："></a>基础概念：</h2><h3 id="进程、线程"><a href="#进程、线程" class="headerlink" title="进程、线程"></a>进程、线程</h3><p>进程即process，线程即thread，从知乎的回答上看，可以了解到，线程是比进程更细粒度的划分，二者均表示占用资源（CPU、内存、IO等）的时间</p>
+<h3 id="world-size-rank"><a href="#world-size-rank" class="headerlink" title="world_size, rank"></a>world_size, rank</h3><p>world_size本质就是指 <strong>进程总数</strong>，而rank则指的是 <strong>当前的进程</strong></p>
+<ul>
+<li>如果是单机多卡的模式，则world_size可以认为是 该卡的GPU总数，rank可以认为是每个GPU对应的进程（如果一个GPU开一个进程的话）</li>
+<li>如果是多机多卡的模式，则world_size可以认为是 <strong>所有卡加起来的GPU总数</strong>，rank可以认为是每个GPU对应的进程（如果一个GPU开一个进程的话）。rank必须是exclusive的，否则会有重叠。<strong>但是此时要注意，如果需要手动在不同的node上面分别开启terminal来实现多进程，那么在指定cuda device(<code>torch.cuda.set_device</code>)时，必须用那个node上面的相对rank，因为每个node 上面的gpu都是从0开始计数的</strong>。</li>
+<li>如果要一个rank（一个进程）同时使用好几个GPU的话，那么总的world_size则为total_num_gpus / gpus_per_rank，此时由于是 <strong>几个GPU共用一个进程，可能会导致读取速度下降</strong>。 <strong>建议还是一个GPU一个进程</strong></li>
+</ul>
+<h2 id="launch-与-spawn的区别"><a href="#launch-与-spawn的区别" class="headerlink" title="launch 与 spawn的区别"></a>launch 与 spawn的区别</h2><ul>
+<li><p><code>torch.distributed.launch</code>本质上通过<code>torch/distributed/launch.py</code>文件来 <strong>先生成对应个数的subprocess</strong>，再分别在对应的subprocess中运行</p>
+</li>
+<li><p>而<code>torch.multiprocessing.spawn</code>则是通过调用python的<code>multiprocessing</code>的包来生成 <strong>Process</strong>，然后分别在Process中运行对应的函数。参数如下：</p>
+<ul>
+<li><p>fn (function) – Function is called as the entrypoint of the spawned process. This function must be defined at the top level of a module so it can be pickled and spawned. This is a requirement imposed by multiprocessing.</p>
+<p>The function is called as fn(i, *args), where i is the process index and args is the passed through tuple of arguments.</p>
+</li>
+<li><p>args (tuple) – Arguments passed to fn.</p>
+</li>
+<li><p>nprocs (int) – Number of processes to spawn.</p>
+</li>
+<li><p>join (bool) – Perform a blocking join on all processes.</p>
+</li>
+<li><p>daemon (bool) – The spawned processes’ daemon flag. If set to True, daemonic processes will be created.</p>
+</li>
+</ul>
+<p><strong>因此更适合用来在一个node上运行<code>nprocs</code>个进程，分别对应那个node上的所有GPU，一个GPU一个Process</strong></p>
+<blockquote>
+<p>The torch.multiprocessing package also provides a <code>spawn</code> function in <a target="_blank" rel="noopener" href="https://pytorch.org/docs/stable/multiprocessing.html#torch.multiprocessing.spawn"><code>torch.multiprocessing.spawn()</code></a>. This helper function can be used to spawn multiple processes. It works by passing in the function that you want to run and spawns N processes to run it. This can be used for multiprocess distributed training as well.</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li>上述两者本质都是相同的（都是通过产生新的进程，然后把任务放到其中运行），<strong>因此都需要在对应的子任务（launch对应的是那个待运行的.py文件，spawn这个对应的是参数中的<code>fn</code>）中设定<code>init_process_group</code>初始化distributed running</strong></li>
+</ul>
+<h2 id="单机多卡的方式"><a href="#单机多卡的方式" class="headerlink" title="单机多卡的方式"></a>单机多卡的方式</h2><ul>
+<li>因为服务器用的是slurm，总共只有3个node，因此用满6个gpu大概率也只是单机上的（虽然通常不会要求用满6个，申请3-4个gpu的时候大概率是在一个node上的），用 <strong>单机多卡的方式</strong>训练会比较好</li>
+<li><strong>默认会把rank 0作为master node</strong></li>
+</ul>
+<h3 id="法1：手动开进程"><a href="#法1：手动开进程" class="headerlink" title="法1：手动开进程"></a>法1：手动开进程</h3><p>即在一个shell文件中放入多条<code>srun</code>指令，来实现每一条<code>srun</code>指令对应一个GPU。这样最稳（因为可以通过添加<code>--exclusive</code>来实现互不占用，<code>CUDA_VISIBLE_DEVICES</code>也只会显示对应的GPU</p>
+<h3 id="法2：用torch-distributed-launch辅助开启进程"><a href="#法2：用torch-distributed-launch辅助开启进程" class="headerlink" title="法2：用torch.distributed.launch辅助开启进程"></a>法2：用<code>torch.distributed.launch</code>辅助开启进程</h3><ul>
+<li><p>需要注意，每个subprocess中的<code>CUDA_VISIBLE_DEVICES</code>都是能够看到 <strong>整个任务所分配的所有GPU</strong></p>
+</li>
+<li><p>单机多卡对应的设置如下即可（MaterPort等默认是用localhost，MasterPort随机生成一个？）</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">python -m torch.distributed.launch --use_env xxx.py<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>多机多卡对应的设置参考如下，来自<a target="_blank" rel="noopener" href="https://github.com/pytorch/pytorch/blob/master/torch/distributed/launch.py">torch.distributed.launch</a></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">
+Node <span class="token number">1</span>: *<span class="token punctuation">(</span>IP: <span class="token number">192.168</span>.1.1, and has a <span class="token function">free</span> port: <span class="token number">1234</span><span class="token punctuation">)</span>*
+::
+    <span class="token operator">>></span><span class="token operator">></span> python -m torch.distributed.launch --nproc_per_node<span class="token operator">=</span>NUM_GPUS_YOU_HAVE
+               --nnodes<span class="token operator">=</span><span class="token number">2</span> --node_rank<span class="token operator">=</span><span class="token number">0</span> --master_addr<span class="token operator">=</span><span class="token string">"192.168.1.1"</span>
+               --master_port<span class="token operator">=</span><span class="token number">1234</span> YOUR_TRAINING_SCRIPT.py <span class="token punctuation">(</span>--arg1 --arg2 --arg3
+               and all other arguments of your training script<span class="token punctuation">)</span>
+Node <span class="token number">2</span>:
+::
+    <span class="token operator">>></span><span class="token operator">></span> python -m torch.distributed.launch --nproc_per_node<span class="token operator">=</span>NUM_GPUS_YOU_HAVE
+               --nnodes<span class="token operator">=</span><span class="token number">2</span> --node_rank<span class="token operator">=</span><span class="token number">1</span> --master_addr<span class="token operator">=</span><span class="token string">"192.168.1.1"</span>
+               --master_port<span class="token operator">=</span><span class="token number">1234</span> YOUR_TRAINING_SCRIPT.py <span class="token punctuation">(</span>--arg1 --arg2 --arg3
+               and all other arguments of your training script<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
+
+</li>
+</ul>
+<h3 id="法3：用torch-multiprocessing-spawn来辅助开启进程"><a href="#法3：用torch-multiprocessing-spawn来辅助开启进程" class="headerlink" title="法3：用torch.multiprocessing.spawn来辅助开启进程"></a>法3：用<code>torch.multiprocessing.spawn</code>来辅助开启进程</h3><ul>
+<li>在<code>fn</code>参数对应的function中，每个function都 <strong>只能看到对应rank（即GPU id），因此也比较安全</strong></li>
+</ul>
+<h2 id="torch-utils-data-distributed-DistributedSampler-理解"><a href="#torch-utils-data-distributed-DistributedSampler-理解" class="headerlink" title="torch.utils.data.distributed.DistributedSampler 理解"></a><code>torch.utils.data.distributed.DistributedSampler</code> 理解</h2><ul>
+<li><p>特点概括：</p>
+<ol>
+<li><p>能够让各个rank（各个进程）都拿到不一样的subset，从而能够保证一个epoch下来，所有Process拿到的数据都是unique的。</p>
+</li>
+<li><p>为了保证每个epoch<strong>都能把所有数据遍历一次</strong>，一个epoch中所有进程加起来的input <strong>可能会超过</strong>原来Dataset的size，原则上多出来的部分从 <strong>原Dataset中index小的部分增加起来</strong>。</p>
+</li>
+<li><p>可不设定world size（总进程数），rank（当前进程），这两个都可以直接用<code>torch.distributed</code>包的函数获得。最后<code>__iter__</code>中的indices是根据这两个确定的。（也是保证每个process对应的indices都不一样）</p>
+</li>
+<li><p>若要达到shuffle的效果，则需要在每个epoch的循环中使用下列命令：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">train_sampler<span class="token punctuation">.</span>set_epoch<span class="token punctuation">(</span>epoch<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+</li>
+</ol>
+</li>
+<li><p>sampler只是sampler，而非batch_sampler（即 <strong>只提供一个list of all indices，而非list of list of indices per batch）</strong>，因此在后续的<code>Dataloader</code>中应该放到<code>sampler</code>的位置，也可以设定<code>batch_size</code>等参数设定每个epoch的输出。</p>
+</li>
+<li><p>world size决定把整个<code>Dataset</code>切成几份，而rank决定sampler输出的<code>indices</code>的起点（在原Dataset中的起点）</p>
+</li>
+<li><p>首先看源码：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> math
+<span class="token keyword">import</span> torch
+<span class="token keyword">from</span> <span class="token punctuation">.</span> <span class="token keyword">import</span> Sampler
+<span class="token keyword">import</span> torch<span class="token punctuation">.</span>distributed <span class="token keyword">as</span> dist
+
+
+<span class="token keyword">class</span> <span class="token class-name">DistributedSampler</span><span class="token punctuation">(</span>Sampler<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""Sampler that restricts data loading to a subset of the dataset.
+
+    It is especially useful in conjunction with
+    :class:`torch.nn.parallel.DistributedDataParallel`. In such case, each
+    process can pass a DitributedSampler instance as a DataLoader sampler,
+    and load a subset of the original dataset that is exclusive to it.
+
+    .. note::
+        Dataset is assumed to be of constant size.
+
+    Arguments:
+        dataset: Dataset used for sampling.
+        num_replicas (optional): Number of processes participating in
+            distributed training.
+        rank (optional): Rank of the current process within num_replicas.
+        shuffle (optional): If true (default), sampler will shuffle the indices
+    """</span>
+
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> dataset<span class="token punctuation">,</span> num_replicas<span class="token operator">=</span><span class="token boolean">None</span><span class="token punctuation">,</span> rank<span class="token operator">=</span><span class="token boolean">None</span><span class="token punctuation">,</span> shuffle<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">if</span> num_replicas <span class="token keyword">is</span> <span class="token boolean">None</span><span class="token punctuation">:</span>
+            <span class="token keyword">if</span> <span class="token keyword">not</span> dist<span class="token punctuation">.</span>is_available<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                <span class="token keyword">raise</span> RuntimeError<span class="token punctuation">(</span><span class="token string">"Requires distributed package to be available"</span><span class="token punctuation">)</span>
+            num_replicas <span class="token operator">=</span> dist<span class="token punctuation">.</span>get_world_size<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">if</span> rank <span class="token keyword">is</span> <span class="token boolean">None</span><span class="token punctuation">:</span>
+            <span class="token keyword">if</span> <span class="token keyword">not</span> dist<span class="token punctuation">.</span>is_available<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                <span class="token keyword">raise</span> RuntimeError<span class="token punctuation">(</span><span class="token string">"Requires distributed package to be available"</span><span class="token punctuation">)</span>
+            rank <span class="token operator">=</span> dist<span class="token punctuation">.</span>get_rank<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>dataset <span class="token operator">=</span> dataset
+        self<span class="token punctuation">.</span>num_replicas <span class="token operator">=</span> num_replicas
+        self<span class="token punctuation">.</span>rank <span class="token operator">=</span> rank
+        self<span class="token punctuation">.</span>epoch <span class="token operator">=</span> <span class="token number">0</span>
+        self<span class="token punctuation">.</span>num_samples <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span>math<span class="token punctuation">.</span>ceil<span class="token punctuation">(</span><span class="token builtin">len</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>dataset<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">1.0</span> <span class="token operator">/</span> self<span class="token punctuation">.</span>num_replicas<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>total_size <span class="token operator">=</span> self<span class="token punctuation">.</span>num_samples <span class="token operator">*</span> self<span class="token punctuation">.</span>num_replicas
+        self<span class="token punctuation">.</span>shuffle <span class="token operator">=</span> shuffle
+
+    <span class="token keyword">def</span> <span class="token function">__iter__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment"># deterministically shuffle based on epoch</span>
+        g <span class="token operator">=</span> torch<span class="token punctuation">.</span>Generator<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        g<span class="token punctuation">.</span>manual_seed<span class="token punctuation">(</span>self<span class="token punctuation">.</span>epoch<span class="token punctuation">)</span>
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>shuffle<span class="token punctuation">:</span>
+            indices <span class="token operator">=</span> torch<span class="token punctuation">.</span>randperm<span class="token punctuation">(</span><span class="token builtin">len</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>dataset<span class="token punctuation">)</span><span class="token punctuation">,</span> generator<span class="token operator">=</span>g<span class="token punctuation">)</span><span class="token punctuation">.</span>tolist<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">else</span><span class="token punctuation">:</span>
+            indices <span class="token operator">=</span> <span class="token builtin">list</span><span class="token punctuation">(</span><span class="token builtin">range</span><span class="token punctuation">(</span><span class="token builtin">len</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>dataset<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+
+        <span class="token comment"># add extra samples to make it evenly divisible</span>
+        indices <span class="token operator">+=</span> indices<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>total_size <span class="token operator">-</span> <span class="token builtin">len</span><span class="token punctuation">(</span>indices<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+        <span class="token keyword">assert</span> <span class="token builtin">len</span><span class="token punctuation">(</span>indices<span class="token punctuation">)</span> <span class="token operator">==</span> self<span class="token punctuation">.</span>total_size
+
+        <span class="token comment"># subsample</span>
+        indices <span class="token operator">=</span> indices<span class="token punctuation">[</span>self<span class="token punctuation">.</span>rank<span class="token punctuation">:</span>self<span class="token punctuation">.</span>total_size<span class="token punctuation">:</span>self<span class="token punctuation">.</span>num_replicas<span class="token punctuation">]</span>
+        <span class="token keyword">assert</span> <span class="token builtin">len</span><span class="token punctuation">(</span>indices<span class="token punctuation">)</span> <span class="token operator">==</span> self<span class="token punctuation">.</span>num_samples
+
+        <span class="token keyword">return</span> <span class="token builtin">iter</span><span class="token punctuation">(</span>indices<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">__len__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>num_samples
+
+    <span class="token keyword">def</span> <span class="token function">set_epoch</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> epoch<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>epoch <span class="token operator">=</span> epoch
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<p>上面有几个关键点：</p>
+<ol>
+<li><code> self.num_samples = int(math.ceil(len(self.dataset) * 1.0 / self.num_replicas))</code> 因为用的是<code>ceil</code>，所以能够保证所有数据都遍历到，但是也会导致可能需要 <strong>从原Dataset的index的头</strong>取indices补足。</li>
+<li><code>self.total_size = self.num_samples * self.num_replicas</code>指的是所有进程加起来的总的samples数，可以看到可能会比原来的<code>Dataset</code>多</li>
+<li><code>g.manual_seed(self.epoch)</code>保证了如果要shuffle，则shuffle出来的顺序会根据epoch数变化，所以具体使用时需要<code>train_sampler.set_epoch(epoch)</code></li>
+<li><code>indices += indices[:(self.total_size - len(indices))]</code>作用是把indices补全到需要的数目为止</li>
+<li><code>indices = indices[self.rank:self.total_size:self.num_replicas]</code>是跳着取的，所以能够保证 <strong>各个subset之间都是互不重叠的</strong></li>
+</ol>
+</li>
+</ul>
+<h2 id="DataParallel和DistributedDataParallel的区别"><a href="#DataParallel和DistributedDataParallel的区别" class="headerlink" title="DataParallel和DistributedDataParallel的区别"></a>DataParallel和DistributedDataParallel的区别</h2><p>参考 <a target="_blank" rel="noopener" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html#comparison-between-dataparallel-and-distributeddataparallel">Comparison between <code>DataParallel</code> and <code>DistributedDataParallel</code></a></p>
+<ul>
+<li>DataParallel 默认是 <strong>单进程，多线程的</strong>，而DistributedDataParallel(DDP) 默认是应该更快的</li>
+<li>如果模型过大导致没办法在 <strong>one gpu</strong> 上训练，并且数据也过大导致没办法在 <strong>one machine</strong>加载进来，可以同时用model parallel 和 DDP，前者对应把model 分开</li>
+</ul>
+<h2 id="torch-distributed-init-method的三种初始化方式"><a href="#torch-distributed-init-method的三种初始化方式" class="headerlink" title="torch.distributed.init_method的三种初始化方式"></a><code>torch.distributed.init_method</code>的三种初始化方式</h2><p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/tutorials/intermediate/dist_tuto.html#initialization-methods">Initialization method</a></p>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/docs/stable/distributed.html#initialization">Initialization</a></p>
+<h3 id="通过TCP通讯的方式："><a href="#通过TCP通讯的方式：" class="headerlink" title="通过TCP通讯的方式："></a>通过TCP通讯的方式：</h3><ul>
+<li>需要提供master的ip和访问的port，需要注意 <strong>这两个应该保证每一个rank（每一个进程或者每一个machine）都能访问到</strong></li>
+<li>如果是单机多卡，那么把ip直接设为localhost(<code>127.0.0.1</code>)即可</li>
+</ul>
+<h3 id="Shared-file-system-initialization"><a href="#Shared-file-system-initialization" class="headerlink" title="Shared file-system initialization"></a>Shared file-system initialization</h3><ul>
+<li>这个更加简单，直接用一个大家都能访问到的文件做共享即可</li>
+<li>需要注意，这个文件 <strong>最好是没有被创建过的，或者是每次训练完后都手动删除（虽然<code>init_process_group()</code>也会自动删除）</strong></li>
+</ul>
+<h3 id="通过环境变量"><a href="#通过环境变量" class="headerlink" title="通过环境变量"></a>通过环境变量</h3><ul>
+<li><p><strong>最最最最推荐这个，配合<code>torch.distributed.launch</code>，具体设置方法参考[torch.distributed.launch设置](### 法2：用<code>torch.distributed.launch</code>辅助开启进程)</strong></p>
+</li>
+<li><p>这个也是默认的方式，即默认传入<code>init_process-group</code>的方法是<code>env://</code>即可，rank和world size都通过环境变量读取</p>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Walter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://khalitt.github.io/2019/10/11/pytorch-distributed/">https://khalitt.github.io/2019/10/11/pytorch-distributed/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/distributed-training/">distributed training</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/10/27/github-usage/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">github使用</div></div></a></div><div class="next-post pull-right"><a href="/2019/10/11/linux-usage/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">linux使用基础</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/null" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Walter</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">48</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">42</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">20</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">基础概念：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">进程、线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#world-size-rank"><span class="toc-number">1.2.</span> <span class="toc-text">world_size, rank</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#launch-%E4%B8%8E-spawn%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">launch 与 spawn的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E6%9C%BA%E5%A4%9A%E5%8D%A1%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">单机多卡的方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%951%EF%BC%9A%E6%89%8B%E5%8A%A8%E5%BC%80%E8%BF%9B%E7%A8%8B"><span class="toc-number">3.1.</span> <span class="toc-text">法1：手动开进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%952%EF%BC%9A%E7%94%A8torch-distributed-launch%E8%BE%85%E5%8A%A9%E5%BC%80%E5%90%AF%E8%BF%9B%E7%A8%8B"><span class="toc-number">3.2.</span> <span class="toc-text">法2：用torch.distributed.launch辅助开启进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%953%EF%BC%9A%E7%94%A8torch-multiprocessing-spawn%E6%9D%A5%E8%BE%85%E5%8A%A9%E5%BC%80%E5%90%AF%E8%BF%9B%E7%A8%8B"><span class="toc-number">3.3.</span> <span class="toc-text">法3：用torch.multiprocessing.spawn来辅助开启进程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#torch-utils-data-distributed-DistributedSampler-%E7%90%86%E8%A7%A3"><span class="toc-number">4.</span> <span class="toc-text">torch.utils.data.distributed.DistributedSampler 理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DataParallel%E5%92%8CDistributedDataParallel%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">5.</span> <span class="toc-text">DataParallel和DistributedDataParallel的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#torch-distributed-init-method%E7%9A%84%E4%B8%89%E7%A7%8D%E5%88%9D%E5%A7%8B%E5%8C%96%E6%96%B9%E5%BC%8F"><span class="toc-number">6.</span> <span class="toc-text">torch.distributed.init_method的三种初始化方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87TCP%E9%80%9A%E8%AE%AF%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%9A"><span class="toc-number">6.1.</span> <span class="toc-text">通过TCP通讯的方式：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Shared-file-system-initialization"><span class="toc-number">6.2.</span> <span class="toc-text">Shared file-system initialization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">6.3.</span> <span class="toc-text">通过环境变量</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/hello-world/" title="Hello World"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2021/02/03/hello-world/" title="Hello World">Hello World</a><time datetime="2021-02-03T13:47:24.254Z" title="Created 2021-02-03 21:47:24">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn"/></a><div class="content"><a class="title" href="/2021/02/03/problems-record/pytorch-does-not-require-grad-and-does-not-have-a-grad_fn/" title="解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn">解决Pytorch RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn</a><time datetime="2021-02-02T16:36:43.000Z" title="Created 2021-02-03 00:36:43">2021-02-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch nan处理"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/pytorch-handling-nan/" title="pytorch nan处理">pytorch nan处理</a><time datetime="2021-02-01T12:36:37.000Z" title="Created 2021-02-01 20:36:37">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hydra可重复性"/></a><div class="content"><a class="title" href="/2021/02/01/problems-record/hydra-reproducibility/" title="hydra可重复性">hydra可重复性</a><time datetime="2021-01-31T16:06:31.000Z" title="Created 2021-02-01 00:06:31">2021-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pytorch不同Dataloader实现方式的比较"/></a><div class="content"><a class="title" href="/2021/01/21/problems-record/comparision-different_loading_methods/" title="pytorch不同Dataloader实现方式的比较">pytorch不同Dataloader实现方式的比较</a><time datetime="2021-01-21T07:15:16.000Z" title="Created 2021-01-21 15:15:16">2021-01-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Walter</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
