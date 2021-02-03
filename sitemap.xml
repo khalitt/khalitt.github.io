@@ -282,14 +282,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/11/25/mmdetection-usage/</loc>
+    <loc>https://khalitt.github.io/2019/12/04/mmdetection-code-explanation/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/12/04/mmdetection-code-explanation/</loc>
+    <loc>https://khalitt.github.io/2019/11/25/mmdetection-usage/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
@@ -317,14 +317,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/11/14/docker-usage/</loc>
+    <loc>https://khalitt.github.io/2019/09/16/dgl/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/09/16/dgl/</loc>
+    <loc>https://khalitt.github.io/2019/11/14/docker-usage/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
@@ -403,14 +403,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/jupyter-lab/</loc>
+    <loc>https://khalitt.github.io/tags/linux/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/linux/</loc>
+    <loc>https://khalitt.github.io/tags/jupyter-lab/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -459,7 +459,7 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/pycharm/</loc>
+    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -473,7 +473,7 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
+    <loc>https://khalitt.github.io/tags/pycharm/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -494,6 +494,13 @@
   </url>
   
   <url>
+    <loc>https://khalitt.github.io/tags/logging/</loc>
+    <lastmod>2021-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://khalitt.github.io/tags/generator/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -502,13 +509,6 @@
   
   <url>
     <loc>https://khalitt.github.io/tags/yield/</loc>
-    <lastmod>2021-02-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://khalitt.github.io/tags/logging/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -578,14 +578,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/tmux/</loc>
+    <loc>https://khalitt.github.io/tags/ssh/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/ssh/</loc>
+    <loc>https://khalitt.github.io/tags/tmux/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -620,14 +620,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/optuna/</loc>
+    <loc>https://khalitt.github.io/tags/joblib/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/joblib/</loc>
+    <loc>https://khalitt.github.io/tags/optuna/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -678,13 +678,6 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/python/</loc>
-    <lastmod>2021-02-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://khalitt.github.io/categories/linux/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -692,7 +685,7 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/python/jupyter/</loc>
+    <loc>https://khalitt.github.io/categories/python/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -713,6 +706,13 @@
   </url>
   
   <url>
+    <loc>https://khalitt.github.io/categories/python/jupyter/</loc>
+    <lastmod>2021-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://khalitt.github.io/categories/graph/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -720,14 +720,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/pycharm/</loc>
+    <loc>https://khalitt.github.io/categories/%E6%8A%80%E6%9C%AF/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/%E6%8A%80%E6%9C%AF/</loc>
+    <loc>https://khalitt.github.io/categories/pycharm/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -776,14 +776,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/optuna/</loc>
+    <loc>https://khalitt.github.io/categories/hydra/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/hydra/</loc>
+    <loc>https://khalitt.github.io/categories/optuna/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
