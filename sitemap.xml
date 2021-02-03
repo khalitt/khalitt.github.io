@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://khalitt.github.io/2020/04/21/migrate-to-Mac-md/</loc>
+    
+    <lastmod>2021-02-03</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://khalitt.github.io/2019/09/09/hexo-blog-notes/</loc>
     
     <lastmod>2021-02-03</lastmod>
@@ -10,13 +17,6 @@
   
   <url>
     <loc>https://khalitt.github.io/2021/02/03/hello-world/</loc>
-    
-    <lastmod>2021-02-03</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://khalitt.github.io/2020/04/21/migrate-to-Mac-md/</loc>
     
     <lastmod>2021-02-03</lastmod>
     
@@ -198,14 +198,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/09/18/sklearn/</loc>
+    <loc>https://khalitt.github.io/2020/02/25/spacevim-usage/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2020/02/25/spacevim-usage/</loc>
+    <loc>https://khalitt.github.io/2019/09/18/sklearn/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
@@ -403,6 +403,13 @@
   </url>
   
   <url>
+    <loc>https://khalitt.github.io/tags/jupyter-lab/</loc>
+    <lastmod>2021-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://khalitt.github.io/tags/linux/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -410,7 +417,7 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/jupyter-lab/</loc>
+    <loc>https://khalitt.github.io/tags/Mac/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -431,13 +438,6 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/Mac/</loc>
-    <lastmod>2021-02-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://khalitt.github.io/tags/mmdetection/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -452,14 +452,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/networkx/</loc>
+    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
+    <loc>https://khalitt.github.io/tags/networkx/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -473,13 +473,6 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/pycharm/</loc>
-    <lastmod>2021-02-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://khalitt.github.io/tags/pyspark/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -487,14 +480,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/configparser/</loc>
+    <loc>https://khalitt.github.io/tags/pycharm/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/logging/</loc>
+    <loc>https://khalitt.github.io/tags/configparser/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -516,6 +509,13 @@
   
   <url>
     <loc>https://khalitt.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
+    <lastmod>2021-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://khalitt.github.io/tags/logging/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -564,13 +564,6 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/sklearn/</loc>
-    <lastmod>2021-02-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://khalitt.github.io/tags/spacevim/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
@@ -578,7 +571,7 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/ssh/</loc>
+    <loc>https://khalitt.github.io/tags/sklearn/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -586,6 +579,13 @@
   
   <url>
     <loc>https://khalitt.github.io/tags/tmux/</loc>
+    <lastmod>2021-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://khalitt.github.io/tags/ssh/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -620,14 +620,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/joblib/</loc>
+    <loc>https://khalitt.github.io/tags/optuna/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/optuna/</loc>
+    <loc>https://khalitt.github.io/tags/joblib/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -678,14 +678,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/linux/</loc>
+    <loc>https://khalitt.github.io/categories/python/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/python/</loc>
+    <loc>https://khalitt.github.io/categories/linux/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -699,14 +699,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/mmdetection/</loc>
+    <loc>https://khalitt.github.io/categories/python/jupyter/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/python/jupyter/</loc>
+    <loc>https://khalitt.github.io/categories/mmdetection/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -727,14 +727,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/pycharm/</loc>
+    <loc>https://khalitt.github.io/categories/spark/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/spark/</loc>
+    <loc>https://khalitt.github.io/categories/pycharm/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -748,14 +748,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/sklearn/</loc>
+    <loc>https://khalitt.github.io/categories/vim/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/vim/</loc>
+    <loc>https://khalitt.github.io/categories/sklearn/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -776,14 +776,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/hydra/</loc>
+    <loc>https://khalitt.github.io/categories/optuna/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/optuna/</loc>
+    <loc>https://khalitt.github.io/categories/hydra/</loc>
     <lastmod>2021-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
