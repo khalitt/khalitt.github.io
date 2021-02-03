@@ -52,3 +52,16 @@ categories: hexo
    hexo g
    
    ```
+
+
+
+# 20210203 update
+
+由于更换了butterfly的主题，因此需要添加：
+
+```bash
+npm install hexo-renderer-pug hexo-renderer-stylus --save
+# 搜索用的
+npm install --save hexo-algolia
+```
+
