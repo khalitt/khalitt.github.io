@@ -25,9 +25,9 @@ categories: python
 
 
 
-## 基础概念
+# 基础概念
 
-### 一些api
+## 一些api
 
 * 创建Process相关的：[`multiprocessing.Process()`](https://docs.python.org/2.7/library/multiprocessing.html#multiprocessing.Process)
   * 可以直接调用默认的构造函数，创建新的进程
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
 
 
-### 基本的思路
+## 基本的思路
 
 1. 创建并开启多个进程：
 
@@ -136,9 +136,9 @@ if __name__ == '__main__':
 
 
 
-## 一些模版
+# 一些模版
 
-### 用Process创建进程，并用[shared variable](http://docs.python.org/library/multiprocessing.html#sharing-state-between-processes)收集结果（略复杂）
+## 用Process创建进程，并用[shared variable](http://docs.python.org/library/multiprocessing.html#sharing-state-between-processes)收集结果（略复杂）
 
 [Python多进程如何获取函数的返回值](https://segmentfault.com/q/1010000010403117)
 
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
 
 
-### 创建进程池Pool，使用map_async或者apply_async，用list把所有结果收集起来
+## 创建进程池Pool，使用map_async或者apply_async，用list把所有结果收集起来
 
 `apply_async`：
 
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
 
 
-### Pool.map/ Pool.map_async的实践
+## Pool.map/ Pool.map_async的实践
 
 [进程池map方法](https://juejin.im/post/5cce9e20f265da036b4a76d6#heading-9)
 
@@ -302,9 +302,9 @@ if __name__ == \'__main__\':
 
 
 
-## 一些tricks
+# 一些tricks
 
-### Pool.map/Pool.map_async传入多个参数
+## Pool.map/Pool.map_async传入多个参数
 
 [pool.map - multiple arguments](http://python.omics.wiki/multiprocessing_map/multiprocessing_partial_function_multiple_arguments)
 
@@ -314,7 +314,7 @@ if __name__ == \'__main__\':
 
 
 
-### 通过ctrl-c结束进程池
+## 通过ctrl-c结束进程池
 
 大体思路：替换系统的signal int
 
@@ -328,7 +328,7 @@ if __name__ == \'__main__\':
 
 
 
-## 实战
+# 实战
 
 
 

@@ -8,15 +8,15 @@ categories: pycharm
 
 
 
-## IdeaVim
+# IdeaVim
 
 实用查询网址：[IdeaVim键位查询](http://ideavim.sourceforge.net/vim/index.html)
 
-### z系列：折叠相关
+## z系列：折叠相关
 
-### g系列：查找相关（查找reference，usage等等）
+## g系列：查找相关（查找reference，usage等等）
 
-### 常用命令
+## 常用命令
 
 - 左右移动: b, ge/ w
 - 查找定义: K
@@ -26,7 +26,7 @@ categories: pycharm
 - 所有代码折叠：zM
 - 所有代码折叠都打开: zR
 
-### 大小写W w E e B b的区别
+## 大小写W w E e B b的区别
 
 默认的小写把各种标点符号作为分隔，而大写则是把space作为分隔，**因此大写应该是比较常用的**
 
@@ -41,7 +41,7 @@ categories: pycharm
 
 
 
-### multiple cursors
+## multiple cursors
 
 > ## multiple-cursors
 >
@@ -92,9 +92,9 @@ categories: pycharm
 
 
 
-## Remote Debug
+# Remote Debug
 
-### 法1：通过Pycharm的Remote Dedugging(强推！！)
+## 法1：通过Pycharm的Remote Dedugging(强推！！)
 
 - 参考：
 
@@ -134,7 +134,7 @@ categories: pycharm
 
 
 
-### Automatically upload 可能失效的原因：
+## Automatically upload 可能失效的原因：
 
 - 关键在于文件要 **被保存！！**，因此需要触发文件被保存
 - 最佳打开方式：通过Ctrl+S。因此此时很有可能是Ctrl+S失效了，原因是因为和VIm emulation冲突了

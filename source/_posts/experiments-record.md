@@ -1404,6 +1404,19 @@ ts=True noise_rate=0.4 val_type=clean use_penalty=True trainer.save_ckpt=False t
 
 
 
+## 关于exchange weights的一些思考
+
+其实**单纯exchange weights或者exchange weights + eps意义不大**：
+
+1. weights由于使用了weights co-guessing labels，因此其实交换前后真正受影响就是计算weight loss的部分，然而这部分显然还是不要交换会更稳定
+2. eps部分，同理受影响的只有eps loss部分，这部分同样还是不要交换会更加稳定
+
+
+
+
+
+
+
 # 每个batch都进行hard weights或者weights sum to 1其实不是非常合理
 
 强行把整个`weights` normalized到`[0, 1]`区间其实不合理，然后再按照一定的值进行截取（hard cut），会导致一定会有那么多数量的样本认为是clean，但是实际上是存在说整个batch都是noisy samples的情况。
@@ -1414,7 +1427,15 @@ ts=True noise_rate=0.4 val_type=clean use_penalty=True trainer.save_ckpt=False t
 
 
 
-可能比较好的做法是把所有weights都收集起来之后再进行normalized
+可能比较好的做法是把所有weights都收集起来之后再进行normalized。然而这种做法不现实，因为这样等价于要全部都过一遍存下来，然后再forward一遍，无形中等价于多了一次forward的过程，时间太长
+
+
+
+## 20210208 update（待实验）
+
+> 所有weights都收集起来之后再进行normalized
+
+对于上述这种做法，`step-based`的更新不是很好，**还是要用`epoch-based`的方法来实验**
 
 
 
@@ -1477,3 +1498,421 @@ HYDRA_FULL_ERROR=1 python srcs/entry_points/reuters_dividemix_train.py status=tr
 `/home/weitaotang/multimodal/pytorch_hydra_results_temp/train/2021-02-01/12-09-21-dividemix_tuning_sym0.6_rerun/config.yaml`
 
 ![image-20210201123821296](/image-20210201123821296.png)
+
+
+
+
+
+# Profiling IEG Train
+
+命令：
+
+```python
+HYDRA_FULL_ERROR=1 python srcs/entry_points/profile_entries/profiling_reuters_ieg_train.py model=reuters_meta_fusion_N  notes="test_fast_dl" trainer.epochs=1 trainer.save_ckpt=false trainer.test_on_best=
+true balance=balance noise_rate=0.4 n_splits=1 data=reuters_all_cv_ieg_dividemix_train
+```
+
+
+
+可以看到两个大头始终是创建meta model这块
+
+![image-20210206152330584](/image-20210206152330584.png)
+
+
+
+
+
+# reuters直接上all cuda也是不太合适的
+
+![image-20210207105435887](/image-20210207105435887.png)
+
+
+
+依然爆显存
+
+
+
+# xrmb和reuters 三种`DataLoader`的对比
+
+reuters
+
+```bash
+
+Initialized train Reuters
+train dataset with 15006 samples
+Original fast dataloader finish with:15.5962 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:16.0180 second
+DataPrefetcher + fast dataloader finish 59 its/1 with:3.7941 second
+DataPrefetcher + fast dataloader finish 59 its/2 with:3.8048 second
+DataPrefetcher + fast dataloader finish 59 its/3 with:3.7636 second
+DataPrefetcher + fast dataloader finish 59 its/4 with:3.8045 second
+DataPrefetcher + fast dataloader finish with:15.5066 second
+Initialized train Reuters
+train dataset with 15006 samples
+Original fast dataloader finish with:15.3795 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:15.3820 second
+DataPrefetcher + fast dataloader finish 59 its/1 with:3.6750 second
+DataPrefetcher + fast dataloader finish 59 its/2 with:3.6984 second
+DataPrefetcher + fast dataloader finish 59 its/3 with:3.6271 second
+DataPrefetcher + fast dataloader finish 59 its/4 with:3.7781 second
+DataPrefetcher + fast dataloader finish with:15.1373 second
+Initialized train Reuters
+train dataset with 15006 samples
+Original fast dataloader finish with:15.2086 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:15.8317 second
+DataPrefetcher + fast dataloader finish 59 its/1 with:3.7164 second
+DataPrefetcher + fast dataloader finish 59 its/2 with:3.7532 second
+DataPrefetcher + fast dataloader finish 59 its/3 with:3.7519 second
+DataPrefetcher + fast dataloader finish 59 its/4 with:3.8027 second
+DataPrefetcher + fast dataloader finish with:15.3566 second
+Initialized train Reuters
+train dataset with 15007 samples
+Original fast dataloader finish with:15.3415 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:15.7691 second
+DataPrefetcher + fast dataloader finish 59 its/1 with:3.9011 second
+DataPrefetcher + fast dataloader finish 59 its/2 with:3.8108 second
+DataPrefetcher + fast dataloader finish 59 its/3 with:3.8389 second
+DataPrefetcher + fast dataloader finish 59 its/4 with:3.7030 second
+DataPrefetcher + fast dataloader finish with:15.6202 second
+Initialized train Reuters
+train dataset with 15007 samples
+Original fast dataloader finish with:15.4841 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:15.9197 second
+DataPrefetcher + fast dataloader finish 59 its/1 with:3.7280 second
+DataPrefetcher + fast dataloader finish 59 its/2 with:3.7924 second
+DataPrefetcher + fast dataloader finish 59 its/3 with:3.7113 second
+DataPrefetcher + fast dataloader finish 59 its/4 with:3.8488 second
+DataPrefetcher + fast dataloader finish with:15.4055 second
+
+```
+
+
+
+xrmb
+
+```bash
+DataPrefetcher + fast dataloader finish 644 its/19 with:0.2231 second                                                                                                                               [23/9811]
+DataPrefetcher + fast dataloader finish with:4.0225 second
+train dataset with 329312 samples
+Original fast dataloader finish with:2.4979 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:2.5478 second
+DataPrefetcher + fast dataloader finish 644 its/1 with:0.2043 second
+DataPrefetcher + fast dataloader finish 644 its/2 with:0.2065 second
+DataPrefetcher + fast dataloader finish 644 its/3 with:0.2066 second
+DataPrefetcher + fast dataloader finish 644 its/4 with:0.2056 second
+DataPrefetcher + fast dataloader finish 644 its/5 with:0.2080 second
+DataPrefetcher + fast dataloader finish 644 its/6 with:0.2032 second
+DataPrefetcher + fast dataloader finish 644 its/7 with:0.2027 second
+DataPrefetcher + fast dataloader finish 644 its/8 with:0.2055 second
+DataPrefetcher + fast dataloader finish 644 its/9 with:0.2063 second
+DataPrefetcher + fast dataloader finish 644 its/10 with:0.2052 second
+DataPrefetcher + fast dataloader finish 644 its/11 with:0.2046 second
+DataPrefetcher + fast dataloader finish 644 its/12 with:0.2053 second
+DataPrefetcher + fast dataloader finish 644 its/13 with:0.2062 second
+DataPrefetcher + fast dataloader finish 644 its/14 with:0.2065 second
+DataPrefetcher + fast dataloader finish 644 its/15 with:0.2088 second
+DataPrefetcher + fast dataloader finish 644 its/16 with:0.2072 second
+DataPrefetcher + fast dataloader finish 644 its/17 with:0.2063 second
+DataPrefetcher + fast dataloader finish 644 its/18 with:0.2057 second
+DataPrefetcher + fast dataloader finish 644 its/19 with:0.2051 second
+DataPrefetcher + fast dataloader finish with:3.9212 second
+train dataset with 329312 samples
+Original fast dataloader finish with:2.5407 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:2.5722 second
+DataPrefetcher + fast dataloader finish 644 its/1 with:0.2071 second
+DataPrefetcher + fast dataloader finish 644 its/2 with:0.2055 second
+DataPrefetcher + fast dataloader finish 644 its/3 with:0.2021 second
+DataPrefetcher + fast dataloader finish 644 its/4 with:0.2035 second
+DataPrefetcher + fast dataloader finish 644 its/5 with:0.2055 second
+DataPrefetcher + fast dataloader finish 644 its/6 with:0.2061 second
+DataPrefetcher + fast dataloader finish 644 its/7 with:0.2042 second
+DataPrefetcher + fast dataloader finish 644 its/8 with:0.2052 second
+DataPrefetcher + fast dataloader finish 644 its/9 with:0.2064 second
+DataPrefetcher + fast dataloader finish 644 its/10 with:0.2053 second
+DataPrefetcher + fast dataloader finish 644 its/11 with:0.2057 second
+DataPrefetcher + fast dataloader finish 644 its/12 with:0.2070 second
+DataPrefetcher + fast dataloader finish 644 its/13 with:0.2101 second
+DataPrefetcher + fast dataloader finish 644 its/14 with:0.2064 second
+DataPrefetcher + fast dataloader finish 644 its/15 with:0.2057 second
+DataPrefetcher + fast dataloader finish 644 its/16 with:0.2052 second
+DataPrefetcher + fast dataloader finish 644 its/17 with:0.2044 second
+DataPrefetcher + fast dataloader finish 644 its/18 with:0.2038 second
+DataPrefetcher + fast dataloader finish 644 its/19 with:0.2065 second
+DataPrefetcher + fast dataloader finish with:3.9167 second
+train dataset with 329312 samples
+Original fast dataloader finish with:2.5503 second
+Prefetcher BackgroundGenerator + fast dataloader finish with:2.6478 second
+DataPrefetcher + fast dataloader finish 644 its/1 with:0.2074 second
+DataPrefetcher + fast dataloader finish 644 its/2 with:0.2052 second
+DataPrefetcher + fast dataloader finish 644 its/3 with:0.2072 second
+DataPrefetcher + fast dataloader finish 644 its/4 with:0.2066 second
+DataPrefetcher + fast dataloader finish 644 its/5 with:0.2058 second
+DataPrefetcher + fast dataloader finish 644 its/6 with:0.2084 second
+DataPrefetcher + fast dataloader finish 644 its/7 with:0.2064 second
+DataPrefetcher + fast dataloader finish 644 its/8 with:0.2050 second
+DataPrefetcher + fast dataloader finish 644 its/9 with:0.2063 second
+DataPrefetcher + fast dataloader finish 644 its/10 with:0.2062 second
+DataPrefetcher + fast dataloader finish 644 its/11 with:0.2052 second
+DataPrefetcher + fast dataloader finish 644 its/12 with:0.2042 second
+DataPrefetcher + fast dataloader finish 644 its/13 with:0.2054 second
+DataPrefetcher + fast dataloader finish 644 its/14 with:0.2045 second
+DataPrefetcher + fast dataloader finish 644 its/15 with:0.2064 second
+DataPrefetcher + fast dataloader finish 644 its/16 with:0.2043 second
+DataPrefetcher + fast dataloader finish 644 its/17 with:0.2052 second
+DataPrefetcher + fast dataloader finish 644 its/18 with:0.2068 second
+DataPrefetcher + fast dataloader finish 644 its/19 with:0.2051 second
+DataPrefetcher + fast dataloader finish with:3.9231 second
+
+```
+
+
+
+可以看到`DataPrefecther`并没有明显的优势，**甚至说`fast dataloader`已经是最优了**
+
+
+
+实测也的确不太好
+
+
+
+`fast dataloader`
+
+![image-20210207221701859](/image-20210207221701859.png)
+
+
+
+`DataPrefetcher`
+
+![image-20210207221737088](/image-20210207221737088.png)
+
+
+
+也许要在`ravdness`这一类`audio visual`数据集上才能体现优势
+
+
+
+
+
+# 使用`train_test_split`或者`StratifyKFold`等Stratify split时要注意如果出现某个类别样本只有一个情况
+
+即如下的错误：
+
+![image-20210211222419292](/image-20210211222419292.png)
+
+
+
+```bash
+ValueError: The least populated class in y has only 1 member, which is too few. The minimum number of groups for any class cannot be less than 2.
+```
+
+
+
+很容易忽略的一个情况，可以用如下的异常捕捉处理
+
+```python
+        if stratify:
+            try:
+                stratify = self.raw_obj.labels.numpy()[self.indices]
+                train_idx, valid_idx = train_test_split(idx_full, test_size=validation_split, stratify=stratify)
+            except Exception as e:
+                traceback.print_exc(file=sys.stdout)
+                logger.warning(f"Stratify splits failed due to \"{e}\".\nreturn to random splits")
+                np.random.shuffle(idx_full)
+                valid_idx = idx_full[0:len_valid]
+                train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        else:
+            np.random.shuffle(idx_full)
+            valid_idx = idx_full[0:len_valid]
+            train_idx = np.delete(idx_full, np.arange(0, len_valid))
+```
+
+
+
+# 对于ravdess来说prefetcher有用
+
+一个augmentation：
+
+![image-20210211224802970](/image-20210211224802970.png)
+
+
+
+两个augmentation：
+
+![image-20210211224825039](/image-20210211224825039.png)
+
+
+
+可以看到都缩短了不少
+
+
+
+# `submitit.core.utils.UncompletedJobError`解决
+
+![image-20210212142015518](/image-20210212142015518.png)
+
+
+
+阅读源码发现大概率是保存的时间超时了，因为之后直接在ipython load进来是没问题的：
+
+![image-20210212141921632](/image-20210212141921632.png)
+
+
+
+![image-20210212142142021](/image-20210212142142021.png)
+
+
+
+解决方法只能手动把这个阈值提高，从原来的15变为60
+
+
+
+![image-20210212142318057](/image-20210212142318057.png)
+
+
+
+如果本次任务是optuna tuning，可以直接用会上一次的study，基本上能够保证出来的参数是上一次未完成的实验
+
+![image-20210212142615203](/image-20210212142615203.png)
+
+![image-20210212142622931](/image-20210212142622931.png)
+
+
+
+
+
+# ravdess `num_workers`尝试
+
+从2-16都试了一次
+
+![image-20210213202244223](/image-20210213202244223.png)
+
+![image-20210213202342468](/image-20210213202342468.png)
+
+![image-20210213202403449](/image-20210213202403449.png)
+
+
+
+可以看到
+
+* 能够比原来200s+提速很多，约4倍
+* 在6-7的时候就差不多了
+* 默认最大不应该超过6，因此设为6就够了
+
+
+
+# ravdess apex尝试 
+
+* 在ieg上进行尝试
+* 由于实现问题，**暂时无法优化meta optimize部分**，所以实际上提速效果不是非常明显。显存占用只缩小了一点点（21000+ -> 19000+）
+
+耗时几乎没变化：
+
+开启AMP前：
+
+![image-20210214173822726](/image-20210214173822726.png)
+
+开启AMP后：
+
+![image-20210214173851816](/image-20210214173851816.png)
+
+
+
+# ravdess 相关论文所使用模型的调研
+
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8644168
+
+audio：仅仅使用MFCC 然后直接用一个LMT，没有用到visual feature
+
+
+
+https://www.mdpi.com/1424-8220/20/1/183
+
+同样是仅仅只使用audio的feature
+
+> we evaluated our SER model on IEMOCAP and RAVDESS datasets using
+> spectrograms. The performance of the proposed CNN models compares with recent CNNs architectures
+> for SER using spectrograms.   
+
+
+
+![image-20210219162641512](/image-20210219162641512.png)
+
+并且也在其中进行了比较，可以看到**resnet50是很正常**的
+
+
+
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8925444
+
+用LSTM multimodal
+
+
+
+https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8682553
+
+类似transfer learning
+
+
+
+
+
+
+
+# ravdess训练太慢：可能解决方法：transfer learning？
+
+参考：
+
+https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html#convnet-as-fixed-feature-extractor 官方的CNN transfer learning， 只train最后的FC layer
+
+https://www.kaggle.com/pmigdal/transfer-learning-with-resnet-50-in-pytorch 同样只train最后的FC layer
+
+
+
+https://balajikulkarni.medium.com/transfer-learning-using-resnet-e20598314427 提到了BN也要变成trainable，因为BN本质上是和数据集相关的，因此要让BN被训练
+
+
+
+https://medium.com/@kenneth.ca95/a-guide-to-transfer-learning-with-keras-using-resnet50-a81a4a28084b 除了FC，resnet50的最后一个block也是trainable的
+
+
+
+https://keras.io/api/applications/ keras 官方教程。里面对于inceptionv3的使用：同样是把前面部分的inception block冻结，后面的训练，从而减少参数，这个**即fine tuning**
+
+> ```python
+> # we chose to train the top 2 inception blocks, i.e. we will freeze
+> # the first 249 layers and unfreeze the rest:
+> for layer in model.layers[:249]:
+>    layer.trainable = False
+> for layer in model.layers[249:]:
+>    layer.trainable = True
+> ```
+
+
+
+
+
+https://thedatafrog.com/en/articles/image-recognition-transfer-learning/ 非常详细的VGG16 fine tuning的教程，同样也是冻结前面所有层
+
+
+
+
+
+# hydra + basic local launcher 使用单例模式时要注意的点
+
+在multirun的模式下，使用basic Launcher自动执行不同的参数时，要注意每次执行并没有重开一个新的进程，而仅仅是按照不同的参数重新执行一次main函数，**即上一次run的数据并为完全消除**，如果此时单例模式中所使用的key又没注意，比如下面这种不够区分度的：
+
+
+
+![image-20210225160054122](/image-20210225160054122.png)
+
+
+
+会导致后面的run都会重复使用第一个run的参数，导致执行失败。
+
+
+
+因此最佳的方法还是把所有的args都拼接起来，作为key
+
+![image-20210225160533554](/image-20210225160533554.png)
+
+
+

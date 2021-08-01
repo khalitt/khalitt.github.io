@@ -3,7 +3,9 @@ title: 服务器Slurm的使用
 date: 2019-10-09 11:06:35
 typora-root-url: server-usage
 typora-copy-images-to: server-usage
-tags: server
+tags: 
+- server
+- submitit
 categories: server
 
 ---
@@ -866,7 +868,70 @@ pydevd_pycharm.settrace('194.87.232.23', port=21342, stdoutToServer=True, stderr
 
 
 
+## 20210213 frp使用stcp
 
+服务端（即公网的VPS）的设置和上面的直接ssh的类似：
+
+```ini
+[common]
+bind_port = 36130
+```
+
+
+
+此时本地机和服务器上都是作为client，其中本地机可以认为是**被暴露内网**的机子，而服务器则作为**访问本地机服务**的外部机器（即visitor）。因此两个客户端的设置分别如下：
+
+服务器上：
+
+```ini
+[common]
+server_addr = xxx.xx.xx.xx
+server_port = 36130
+
+[secret_ssh_visitor]
+# frpc role visitor -> frps -> frpc role server
+role = visitor
+type = stcp
+# the server name you want to visitor
+server_name = secret_ssh
+# 即key，可以随机生成
+sk = yX7dp@ApWU8fA4iR
+# connect this address to visitor stcp server
+# 即在服务器上，在代码中访问对应的端口即可创建到本地机的连接
+bind_addr = 127.0.0.1
+bind_port = 21342
+```
+
+
+
+本地机：
+
+```ini
+[common]
+server_addr = 194.87.232.23
+server_port = 36130
+
+[secret_ssh]
+# If the type is secret tcp, remote_port is useless
+# Who want to connect local port should deploy another frpc with stcp proxy and role is visitor
+type = stcp
+# sk used for authentication for visitors
+sk = yX7dp@ApWU8fA4iR
+local_ip = 127.0.0.1
+local_port = 21342
+```
+
+
+
+在代码中添加如下的即可：
+
+```python
+pydevd_pycharm.settrace('127.0.0.1', port=21342, stdoutToServer=True, stderrToServer=True, suspend=False)
+```
+
+
+
+但是由于本质上被暴露的机子是本地机，服务器在直接的ssh连接中直接访问公网的vps，不会有任何信息的泄露，因此推荐直接用 [20210129 update(最新的简单方法！！无需在第三台主机上开启frp)](#20210129 update(最新的简单方法！！无需在第三台主机上开启frp))中的方法
 
 
 
@@ -934,7 +999,32 @@ srun: error: Unable to create step for job 99825: More processors requested than
 
 
 
+整理下来即：
 
+```bash
+# 指定好节点，以及对应所需的tasks数
+salloc --gres=gpu:1 -w nodename -n 6 zsh
+# 通过srun获取gpu资源，运行对应的程序
+srun --gres=gpu:1 -t 4320 --pty zsh
+
+## Optional 开启tmux，不过不推荐直接在zsh中开启tmux
+tmux
+```
+
+
+
+推荐可以用screen，因为能够共享`salloc`的信息
+
+```bash
+# 指定好节点，以及对应所需的tasks数
+salloc --gres=gpu:1 -w nodename -n 6 zsh
+screen
+# 通过srun获取gpu资源，运行对应的程序
+srun --gres=gpu:1 -t 4320 --pty zsh
+
+```
+
+![image-20210204122127015](/image-20210204122127015.png)
 
 # sbatch job array的一些尝试
 
@@ -958,6 +1048,10 @@ srun -l --ntasks 1 -c 1 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_
 
 
 
+先说总结：
+
+* 本质上job array等价于**自动提交多个`sbatch`，并添加了一些环境变量**，所以`sbatch`脚本中的shebang的限制只限制array中的每个sub task
+
 ## `shebang`只限制每个`sub task`，而`salloc`分配的资源限制总的task数
 
 一开始`salloc -n 8 --pty zsh`开启一个新的shell，可以看到总的`tasks`数即3
@@ -974,17 +1068,226 @@ srun -l --ntasks 1 -c 1 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_
 
 
 
-修改之后的
+修改之后的脚本，此时`shebang`就起作用了，因此此时等价于每条`srun`（每个所提交的脚本文件）的tasks数都被限制为3
+
+```bash
+#!/bin/bash
+#SBATCH --ntasks=3
+## more options
+#srun --ntasks 8 -c 2 bash -c "echo hello; sleep 10"
+#srun -l --ntasks 4 -c 2 hostname
+
+srun -l --ntasks 2 -c 2 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_TASK_ID sub tasks;sleep 10"
+```
+
+运行提示资源不足，直接被杀
+
+![image-20210204132040677](/image-20210204132040677.png)
 
 
 
-## `srun`提交的`ntasks=2`
+## `srun`提交的`ntasks=2 cpu-per-task=2`
+
+```bash
+ sbatch --array=1-12 interpret_task.sh
+```
+
+![image-20210204132708964](/image-20210204132708964.png)
+
+
+
+由于一开始`salloc`获得的`ntasks=8`，而默认情况下`cpu-per-task=1`，因此等价于**总共获取了8个cpu**。
+
+而每一条`srun`都需要4个cpu，因此执行的时候等价于**每次只能执行两条`srun`指令**
+
+
 
 ```bash
 #!/bin/bash
 #SBATCH --ntasks=4
 ## more options
 
-srun -l --ntasks 2 -c 1 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_TASK_ID sub tasks;sleep 10"
+srun -l --ntasks 2 -c 2 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_TASK_ID sub tasks;sleep 10"
+```
+
+
+
+## 提交gpu任务
+
+注意由于job array是基于`sbatch`的，因此需要gpu任务的需要在`shebang`中指定，而不应该在`srun`中指定
+
+即下面的才是正确的
+
+```bash
+#!/bin/bash
+#SBATCH --ntasks=3
+#SBATCH --gres=gpu:1 # 正确做法
+## more options
+#srun --ntasks 8 -c 2 bash -c "echo hello; sleep 10"
+#srun -l --ntasks 4 -c 2 hostname
+
+#错误写法
+# srun -l --gres=gpu:1 --ntasks 1 -c 1 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_TASK_ID sub tasks;sleep 10"
+srun -l --ntasks 1 -c 1 bash -c "echo running $SLURM_ARRAY_JOB_ID\/$SLURM_ARRAY_TASK_ID sub tasks;sleep 10"
+
+```
+
+
+
+但是由于job array基于`sbatch`，所以执行下面的两条指令不能成功：
+
+```bash
+sbatch --array=1-12 interpret_task_gpu.sh
+# or 手动限制每次执行的任务数为1
+sbatch --array=1-12%1 interpret_task_gpu.sh
+```
+
+![image-20210204135353813](/image-20210204135353813.png)
+
+必须得关了一开始`salloc`，退出这个job，直接在管理节点上提交job array才行
+
+
+
+![image-20210204135145683](/image-20210204135145683.png)
+
+
+
+## 针对submitit的一些理解
+
+这里主要指的是hydra的。hydra的submitit插件在multirun的情况下，默认就是基于sbatch的job array，所以同样的如果在`salloc`之后，然后在`config`中指定了`gres=gpu:1`，一样会因为资源被限制而无法执行
+
+![image-20210204140928955](/image-20210204140928955.png)
+
+对应的`config.yaml`和自动生成的`submission.sh`：
+
+```yaml
+defaults:
+  - hydra/launcher: submitit_slurm
+
+task: 1
+hydra:
+  launcher:
+    cpus_per_task: 1
+    tasks_per_node: 1
+    partition: defq
+    array_parallelism: 1
+    additional_parameters:
+      nodelist: "node04"
+      time: 1440
+      gres: gpu:1
+```
+
+
+
+```bash
+#!/bin/bash
+
+# Parameters
+#SBATCH --array=0-2%1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=/home/weitaotang/package/hydra/plugins/hydra_submitit_launcher/example/multirun/2021-02-04/14-09-11/.submitit/%A_%a/%A_%a_0_log.err
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=my_app
+#SBATCH --mem=4GB
+#SBATCH --nodelist=node04
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --open-mode=append
+#SBATCH --output=/home/weitaotang/package/hydra/plugins/hydra_submitit_launcher/example/multirun/2021-02-04/14-09-11/.submitit/%A_%a/%A_%a_0_log.out
+#SBATCH --partition=defq
+#SBATCH --signal=USR1@120
+#SBATCH --time=1440
+#SBATCH --wckey=submitit
+
+# command
+export SUBMITIT_EXECUTOR=slurm
+srun --output /home/weitaotang/package/hydra/plugins/hydra_submitit_launcher/example/multirun/2021-02-04/14-09-11/.submitit/%A_%a/%A_%a_%t_log.out --error /home/weitaotang/package/hydra/plugins/hydra_submitit_launcher/example/multirun/2021-02-04/14-09-11/.submitit/%A_%a/%A_%a_%t_log.err --unbuffered /home/weitaotang/.conda/envs/multimodal/bin/python -u -m submitit.core._submit /home/weitaotang/package/hydra/plugins/hydra_submitit_launcher/example/multirun/2021-02-04/14-09-11/.submitit/%j
+
+```
+
+
+
+同样是需要推出`salloc`重新提交。可以看到在设置了`array_parallelism: 1`后，这时候就能够成功执行了
+
+![image-20210204141251563](/image-20210204141251563.png)
+
+![image-20210204141357108](/image-20210204141357108.png)
+
+
+
+
+
+# submitit重跑job array中失败的任务，并保存到原目录
+
+关键点：
+
+* 删除上一次失败的任务，或者把他们改名（比如在开头添加`failed`）
+* 修改一开始的参数
+
+
+
+具体步骤如下：
+
+
+
+首先找到submiti自动生成的脚本（通常在对应`sweep` folder的`.submitit`下），比如下面这个
+
+```bash
+#!/bin/bash
+
+# Parameters
+#SBATCH --array=0-7%8
+#SBATCH --cpus-per-task=4
+#SBATCH --error=/home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_0_log.err
+#SBATCH --exclude=node01,node02,node03
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=enterface_ieg_train
+#SBATCH --mem=12GB
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --open-mode=append
+#SBATCH --output=/home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_0_log.out
+#SBATCH --partition=defq
+#SBATCH --qos=high
+#SBATCH --signal=USR1@120
+#SBATCH --time=4320
+#SBATCH --wckey=submitit
+
+# command
+export SUBMITIT_EXECUTOR=slurm
+srun --output /home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_%t_log.out --error /home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_%t_log.err --unbuffered /home/weitaotang/.conda/envs/multimodal_new/bin/python -u -m submitit.core._submit /home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%j
+```
+
+
+
+然后修改开头的job array，比如失败的任务是0,5，则可以直接修改第一行为`#SBATCH --array=0,5`
+
+同时还可以加入`requeue`让其自动失败重跑。最后的脚本如下
+
+```bash
+#!/bin/bash
+
+# Parameters
+#SBATCH --array=0,5
+#SBATCH --requeue
+#SBATCH --cpus-per-task=4
+#SBATCH --error=/home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_0_log.err
+#SBATCH --exclude=node01,node02,node03
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=enterface_ieg_train
+#SBATCH --mem=12GB
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --open-mode=append
+#SBATCH --output=/home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_0_log.out
+#SBATCH --partition=defq
+#SBATCH --qos=high
+#SBATCH --signal=USR1@120
+#SBATCH --time=4320
+#SBATCH --wckey=submitit
+
+# command
+export SUBMITIT_EXECUTOR=slurm
+srun --output /home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_%t_log.out --error /home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%A_%a/%A_%a_%t_log.err --unbuffered /home/weitaotang/.conda/envs/multimodal_new/bin/python -u -m submitit.core._submit /home/weitaotang/multimodal/pytorch_hydra_results_temp/multirun/2021-03-10/21-21-13-enterface_reuters_ieg_best_original_all_rerun_lr0.001/.submitit/%j
 ```
 

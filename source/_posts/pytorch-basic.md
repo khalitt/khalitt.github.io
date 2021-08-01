@@ -1012,3 +1012,145 @@ new_x = x.clone.detach().to(torch.device('cuda')).requires_grad_(True)
 
 <img src="https://raw.githubusercontent.com/khalitt/IMG_REPO/master/20210131112839.png" align=center/>
 
+
+
+# `torch.as_tensor()` 和`torch.from_numpy()`的区别
+
+参考 [From_numpy vs as_tensor](https://discuss.pytorch.org/t/from-numpy-vs-as-tensor/79932)
+
+> Yes, **both approaches share the underlying memory.**
+> `torch.as_tensor` accepts a bit more that `torch.from_numpy`, such as `list` objects, and might thus have a slightly higher overhead for these checks.
+
+
+
+所以对于`numpy.array()`来说，几乎没差别
+
+
+
+# `torch.nn.ModuleList()`导致的`UserWarning: Setting attributes on ParameterList is not supported. `
+
+
+
+![image-20210206175230565](C:/Users/walter/AppData/Roaming/Typora/typora-user-images/image-20210206175230565.png)
+
+
+
+把实现方式从
+
+```python
+            self.factors = nn.ParameterList(
+                [nn.Parameter(torch.Tensor(self.rank, 10 + 1, 6), requires_grad=True) for _ in
+                 range(len(mds))])
+```
+
+
+
+变为
+
+```python
+            for num_md in range(len(num_mds)):
+                self.factors.append(nn.Parameter(torch.Tensor(self.rank, 10 + 1, 6), requires_grad=True))
+                setattr(self, f"factor_{num_md}", self.factors[-1])
+```
+
+
+
+这样打印`model.name_parameters()`时，就从
+
+```bash
+{'fusion_weights': None,
+ 'fusion_bias': None,
+ 'all_fcs.0.0.weight': None,
+ 'all_fcs.0.0.bias': None,
+ 'all_fcs.0.2.weight': None,
+ 'all_fcs.0.2.bias': None,
+ 'all_fcs.0.4.weight': None,
+ 'all_fcs.0.4.bias': None,
+ 'all_fcs.0.6.weight': None,
+ 'all_fcs.0.6.bias': None,
+ 'all_fcs.1.0.weight': None,
+ 'all_fcs.1.0.bias': None,
+ 'all_fcs.1.2.weight': None,
+ 'all_fcs.1.2.bias': None,
+ 'all_fcs.1.4.weight': None,
+ 'all_fcs.1.4.bias': None,
+ 'all_fcs.1.6.weight': None,
+ 'all_fcs.1.6.bias': None,
+ 'factors.0': None,
+ 'factors.1': None}
+```
+
+变为
+
+```bash
+{'factor_0': None,
+ 'factor_1': None,
+ 'fusion_weights': None,
+ 'fusion_bias': None,
+ 'fc_0.0.weight': None,
+ 'fc_0.0.bias': None,
+ 'fc_0.2.weight': None,
+ 'fc_0.2.bias': None,
+ 'fc_0.4.weight': None,
+ 'fc_0.4.bias': None,
+ 'fc_0.6.weight': None,
+ 'fc_0.6.bias': None,
+ 'fc_1.0.weight': None,
+ 'fc_1.0.bias': None,
+ 'fc_1.2.weight': None,
+ 'fc_1.2.bias': None,
+ 'fc_1.4.weight': None,
+ 'fc_1.4.bias': None,
+ 'fc_1.6.weight': None,
+ 'fc_1.6.bias': None}
+
+```
+
+
+
+![image-20210207105445811](C:/Users/walter/AppData/Roaming/Typora/typora-user-images/image-20210207105445811.png)
+
+
+
+
+
+# 多个模型一起训练
+
+[Train multiple models on multiple GPUs](https://discuss.pytorch.org/t/train-multiple-models-on-multiple-gpus/16868/4)
+
+直接训练即可
+
+> I think in your current implementation you would indeed have to wait until the optimization was done on each GPU.
+> If you just have two models, you could push each input and target `tensor` to the appropriate GPU and call the forward passes after each other.
+> **Since these calls are performed asynchronously,** you could achieve a speedup in this way.
+> The code should look like this:
+
+
+
+还可以把不同的模型放到不同的设备上，单独进行训练，参照上的链接[Train multiple models on multiple GPUs](https://discuss.pytorch.org/t/train-multiple-models-on-multiple-gpus/16868/4)
+
+
+
+或者参考 [Combining Trained Models in PyTorch](https://discuss.pytorch.org/t/combining-trained-models-in-pytorch/28383/2)，放到同一个模型里面，等价写一个`MyEnsemble`模型，然后同时调用两个模型（内部本质上和上面单独叫没啥差别）
+
+
+
+还可以参考 [Train multiple models on multiple GPUs](https://discuss.pytorch.org/t/train-multiple-models-on-multiple-gpus/16868/9) 这个回答，用分布式实现
+
+
+
+# 修改模型的时候不建议把`Module.children()`做成一个list再放到`nn.Sequential`里面
+
+参考 [Combining Trained Models in PyTorch](https://discuss.pytorch.org/t/combining-trained-models-in-pytorch/28383/24)
+
+> The code looks generally OK, but I wouldn’t recommend to create new models via passing the child modules to `nn.Sequential`.
+> **Using this approach you would call each submodule in a sequential way and would therefore lose all functional calls**, which were used in the original `forward`.
+> E.g. for `DenseNet` you would lose [these calls](https://github.com/pytorch/vision/blob/d6ee8757eca7b74b98e5f0d434a565eb7b1c410b/torchvision/models/densenet.py#L191-L196).
+
+
+
+
+
+# tuning tips
+
+http://karpathy.github.io/2019/04/25/recipe/
