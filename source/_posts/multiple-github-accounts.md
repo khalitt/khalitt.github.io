@@ -1,5 +1,5 @@
 ---
-title: multiple-github-accounts
+title: github多账号设置
 typora-root-url: multiple-github-accounts
 typora-copy-images-to: multiple-github-accounts
 date: 2021-08-07 21:11:04
