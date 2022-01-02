@@ -109,7 +109,26 @@ deploy:
   token: a1d068cb1b3dd8b459a6998db9a65e9567443270
   message: 
 
+#algolia:
+#  applicationID: '5100G1WE6M'
+#  apiKey: 'c2a0f74ed768aa33e0c961937aa244bc'
+#  indexName: 'prob_khalitt_github_io2'
+
 algolia:
-  applicationID: '5100G1WE6M'
-  apiKey: 'c2a0f74ed768aa33e0c961937aa244bc'
-  indexName: 'prob_khalitt_github_io2'
+  appId: "5100G1WE6M"
+  apiKey: "c2a0f74ed768aa33e0c961937aa244bc"
+  adminApiKey: "03f82bcc5695a5eade1d095ff8872a3b"
+  chunkSize: 500
+  indexName: "prod_khalitt_github_io"
+  fields:
+    - content:strip:truncate,0,72500
+    - excerpt:strip
+    - gallery
+    - permalink
+    - photos
+    - slug
+    - tags
+    - title
+
+plugins:
+  - hexo-algoliasearch
