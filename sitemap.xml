@@ -345,14 +345,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2020/01/16/lxml-usage/</loc>
+    <loc>https://khalitt.github.io/2020/05/06/matplotlib-usage/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2020/05/06/matplotlib-usage/</loc>
+    <loc>https://khalitt.github.io/2020/01/16/lxml-usage/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
@@ -438,14 +438,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/noisy-labels/</loc>
+    <loc>https://khalitt.github.io/tags/github/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/github/</loc>
+    <loc>https://khalitt.github.io/tags/noisy-labels/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -515,14 +515,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/pandas/</loc>
+    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
+    <loc>https://khalitt.github.io/tags/pandas/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -627,13 +627,6 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/shell/</loc>
-    <lastmod>2022-06-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://khalitt.github.io/tags/server/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
@@ -642,6 +635,13 @@
   
   <url>
     <loc>https://khalitt.github.io/tags/submitit/</loc>
+    <lastmod>2022-06-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://khalitt.github.io/tags/shell/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -662,14 +662,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/ssh/</loc>
+    <loc>https://khalitt.github.io/tags/tmux/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/tmux/</loc>
+    <loc>https://khalitt.github.io/tags/ssh/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -690,14 +690,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/io/</loc>
+    <loc>https://khalitt.github.io/tags/docker/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/docker/</loc>
+    <loc>https://khalitt.github.io/tags/io/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -769,14 +769,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/python/jupyter/</loc>
+    <loc>https://khalitt.github.io/categories/hexo/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/categories/hexo/</loc>
+    <loc>https://khalitt.github.io/categories/python/jupyter/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
