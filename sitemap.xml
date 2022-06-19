@@ -394,14 +394,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/09/11/attention/</loc>
+    <loc>https://khalitt.github.io/2019/09/11/Attention%20Models%20in%20Graphs%20A%20Survey/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/2019/09/11/Attention%20Models%20in%20Graphs%20A%20Survey/</loc>
+    <loc>https://khalitt.github.io/2019/09/11/attention/</loc>
     
     <lastmod>2021-01-07</lastmod>
     
@@ -515,14 +515,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
+    <loc>https://khalitt.github.io/tags/pandas/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/pandas/</loc>
+    <loc>https://khalitt.github.io/tags/OpenCV/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -557,13 +557,6 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/logging/</loc>
-    <lastmod>2022-06-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://khalitt.github.io/tags/generator/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
@@ -572,6 +565,13 @@
   
   <url>
     <loc>https://khalitt.github.io/tags/yield/</loc>
+    <lastmod>2022-06-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://khalitt.github.io/tags/logging/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -627,6 +627,13 @@
   </url>
   
   <url>
+    <loc>https://khalitt.github.io/tags/shell/</loc>
+    <lastmod>2022-06-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://khalitt.github.io/tags/server/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
@@ -635,13 +642,6 @@
   
   <url>
     <loc>https://khalitt.github.io/tags/submitit/</loc>
-    <lastmod>2022-06-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://khalitt.github.io/tags/shell/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -718,14 +718,14 @@
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/joblib/</loc>
+    <loc>https://khalitt.github.io/tags/ipython/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://khalitt.github.io/tags/ipython/</loc>
+    <loc>https://khalitt.github.io/tags/joblib/</loc>
     <lastmod>2022-06-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
